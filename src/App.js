@@ -5,7 +5,8 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import EmployeeForm from './components/EmployeeForm';
 import ForgotPassword from   './components/ForgotPassword';
-import AddStock from './components/AddStock'
+import AddStock from './components/AddStock';
+import StockManagement from './components/StockManagement';
 
 // In your routes configuration
 
@@ -22,6 +23,7 @@ function App() {
         <Route path="/staff/update/:id" element={<EmployeeForm mode="update" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path='/addStock' element={<AddStock />} />
+        <Route path='/stock-management' element={<StockManagement />} />
    
       </Routes>
     </div>

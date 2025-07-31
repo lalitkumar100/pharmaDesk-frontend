@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import Reports from './Reports';
 import StaffDirectory from './StaffDirectory';
 import AddStock from './AddStock';
+import StockManagement  from './StockManagement'
 
 const menuItems = [
   { name: 'Dashboard', icon: HomeIcon },
@@ -50,13 +51,7 @@ const pageContent = {
       <AddStock />
   ),
   Stock: (
-    <div>
-      <h1 className="text-3xl font-extrabold mb-4 text-theme-700">Stock</h1>
-      <div className="bg-white rounded-xl shadow p-6">
-        <p className="text-gray-600">View and manage your current stock.</p>
-        {/* Stock table goes here */}
-      </div>
-    </div>
+  <StockManagement />
   ),
   Report: (
     <Reports />
