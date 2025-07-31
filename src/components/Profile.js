@@ -199,13 +199,7 @@ const Profile = () => {
       return;
     }
 
-    // Password validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(passwordData.newPassword)) {
-      setMessage('Password does not meet requirements');
-      return;
-    }
-
+    
     try {
       // Get token from localStorage
       const token = localStorage.getItem('token');

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -133,13 +134,10 @@ const Login = () => {
             </button>
 
             <div className="text-center">
-              <button
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="text-sm text-aqua-blue-600 hover:text-aqua-blue-700 font-medium"
-              >
-                Forgot Password?
-              </button>
+     
+<Link to="/forgot-Password" className="text-aqua-blue-600 hover:underline">
+  Forgot Password?
+</Link>
             </div>
 
             <div className="text-center text-sm text-gray-500">

@@ -15,7 +15,7 @@ const ForgotPassword = () => {
 
     try {
       // Replace with your actual API URL
-      const response = await axios.post('http://localhost:3001/forgot-password', { email });
+      const response = await axios.post('http://localhost:4000/forgot-password', { email });
       
       if (response.status === 200) {
         setMessage(response.data.message || 'Password reset email sent successfully!');

@@ -7,22 +7,22 @@ module.exports = {
     extend: {
       colors: {
         'aqua-blue': {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-        }
+   50: '#f3fdf4',
+          100: '#e0f8e2',
+          200: '#baf0c2',
+          300: '#8be49e',
+          400: '#5ed87d',
+          500: '#34cc5f',
+          600: '#2bb850',
+          700: '#229e44',
+          800: '#1a8438',
+          900: '#0e5c25',
+        }, // ✅ Don't forget this comma if you add more config items
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
-      }
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
     },
   },
   plugins: [],
-} 
+}
