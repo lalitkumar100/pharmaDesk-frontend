@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'aqua-blue': {
+        'theme': {
    50: '#f3fdf4',
           100: '#e0f8e2',
           200: '#baf0c2',

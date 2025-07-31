@@ -5,6 +5,7 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import EmployeeForm from './components/EmployeeForm';
 import ForgotPassword from   './components/ForgotPassword';
+import AddStock from './components/AddStock'
 
 // In your routes configuration
 
@@ -20,6 +21,8 @@ function App() {
         <Route path="/staff/add" element={<EmployeeForm mode="add" />} />
         <Route path="/staff/update/:id" element={<EmployeeForm mode="update" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path='/addStock' element={<AddStock />} />
+   
       </Routes>
     </div>
   );

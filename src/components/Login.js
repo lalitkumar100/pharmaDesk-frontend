@@ -62,8 +62,8 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Section - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-aqua-blue-500 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-aqua-blue-400 to-aqua-blue-600"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-theme-500 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-theme-400 to-theme-600"></div>
         <div className="relative z-10 flex items-center justify-center w-full">
           <div className="text-center text-white">
             <div className="w-24 h-24 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -82,7 +82,7 @@ const Login = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 bg-aqua-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-theme-500 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
               </svg>
@@ -104,7 +104,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
                 placeholder="Enter your email"
               />
             </div>
@@ -120,7 +120,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
                 placeholder="Enter your password"
               />
             </div>
@@ -128,21 +128,20 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-aqua-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-aqua-blue-600 focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-theme-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-theme-600 focus:outline-none focus:ring-2 focus:ring-theme-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing in...' : 'Login'}
             </button>
 
             <div className="text-center">
-     
-<Link to="/forgot-Password" className="text-aqua-blue-600 hover:underline">
-  Forgot Password?
-</Link>
+              <Link to="/forgot-Password" className="text-theme-600 hover:underline">
+                Forgot Password?
+              </Link>
             </div>
 
             <div className="text-center text-sm text-gray-500">
               Need help? Contact{' '}
-              <a href="mailto:help@pharmaDesk.com" className="text-aqua-blue-600 hover:text-aqua-blue-700">
+              <a href="mailto:help@pharmaDesk.com" className="text-theme-600 hover:text-theme-700">
                 help@pharmaDesk.com
               </a>
             </div>
@@ -169,4 +168,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

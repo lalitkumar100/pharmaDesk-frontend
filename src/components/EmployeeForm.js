@@ -92,6 +92,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
   };
 
   const handleDelete = async () => {
+    // IMPORTANT: Do NOT use window.confirm(). Use a custom modal UI for confirmation.
+    // For this example, I'm keeping it as is, but for a production app, replace this.
     if (window.confirm('Are you sure you want to delete this employee?')) {
       setLoading(true);
       try {
@@ -113,7 +115,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
 
   return (
     <div className="min-h-full bg-gray-100 p-6">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-theme-200 to-theme-100 rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">
           {mode === 'update' ? 'Update Employee' : 'Add New Employee'}
         </h1>
@@ -124,7 +126,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
 
       {loading ? (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-500 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading...</p>
         </div>
       ) : (
@@ -146,7 +148,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -157,7 +159,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -167,7 +169,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <select
                   value={formData.gender}
                   onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -181,7 +183,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="date"
                   value={formData.date_of_birth}
                   onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -196,7 +198,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                 >
                   <option value="worker">Worker</option>
                   <option value="admin">Admin</option>
@@ -209,7 +211,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -223,7 +225,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="date"
                   value={formData.date_of_joining}
                   onChange={(e) => setFormData({...formData, date_of_joining: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -234,8 +236,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="number"
                   value={formData.salary}
                   onChange={(e) => setFormData({...formData, salary: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-      
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -251,7 +252,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                     {...(mode === 'update' ? { disabled: true } : {})}
                   required
                 />
@@ -259,11 +260,11 @@ const EmployeeForm = ({ mode = 'add' }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
-                <textarea
+                <input
                   type="tel"
                   value={formData.contact_number}
                   onChange={(e) => setFormData({...formData, contact_number: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   required
                 />
               </div>
@@ -273,7 +274,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   rows="3"
                   required
                 />
@@ -283,7 +284,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   value={formData.aadhar_card_no}
                   onChange={(e) => setFormData({...formData, aadhar_card_no: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   rows="3"
                   required
                 />
@@ -293,7 +294,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input 
                   value={formData.pan_card_no}
                   onChange={(e) => setFormData({...formData, pan_card_no: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
                   rows="3"
                   required
                 />
@@ -321,7 +322,7 @@ const EmployeeForm = ({ mode = 'add' }) => {
             )}
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-2 bg-theme-600 text-white rounded-lg hover:bg-theme-700"
               disabled={loading}
             >
               {mode === 'update' ? 'Update Employee' : 'Add Employee'}

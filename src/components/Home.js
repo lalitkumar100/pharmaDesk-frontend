@@ -13,6 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Reports from './Reports';
 import StaffDirectory from './StaffDirectory';
+import AddStock from './AddStock';
 
 const menuItems = [
   { name: 'Dashboard', icon: HomeIcon },
@@ -26,10 +27,10 @@ const menuItems = [
 const pageContent = {
   Dashboard: (
     <div>
-      <h1 className="text-3xl font-extrabold mb-4 text-aqua-blue-700">Dashboard</h1>
+      <h1 className="text-3xl font-extrabold mb-4 text-theme-700">Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-          <span className="text-4xl font-bold text-sky-600 mb-2">120</span>
+          <span className="text-4xl font-bold text-theme-600 mb-2">120</span>
           <span className="text-gray-500">Total Medicines</span>
         </div>
         <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
@@ -38,7 +39,7 @@ const pageContent = {
         </div>
       </div>
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-2 text-sky-700">Welcome to pharmaDesk</h2>
+        <h2 className="text-xl font-semibold mb-2 text-theme-700">Welcome to pharmaDesk</h2>
         <p className="text-gray-600">
           Easily manage your pharmacy inventory, add new stock, and view insightful reports.
         </p>
@@ -46,17 +47,11 @@ const pageContent = {
     </div>
   ),
   'Add Stock': (
-    <div>
-      <h1 className="text-3xl font-extrabold mb-4 text-sky-700">Add Stock</h1>
-      <div className="bg-white rounded-xl shadow p-6">
-        <p className="text-gray-600">Add new medicines to your inventory.</p>
-        {/* Add Stock form goes here */}
-      </div>
-    </div>
+      <AddStock />
   ),
   Stock: (
     <div>
-      <h1 className="text-3xl font-extrabold mb-4 text-sky-700">Stock</h1>
+      <h1 className="text-3xl font-extrabold mb-4 text-theme-700">Stock</h1>
       <div className="bg-white rounded-xl shadow p-6">
         <p className="text-gray-600">View and manage your current stock.</p>
         {/* Stock table goes here */}
@@ -68,7 +63,7 @@ const pageContent = {
   ),
   'Todo List': (
     <div>
-      <h1 className="text-3xl font-extrabold mb-4 text-sky-700">Todo List</h1>
+      <h1 className="text-3xl font-extrabold mb-4 text-theme-700">Todo List</h1>
       <div className="bg-white rounded-xl shadow p-6">
         <p className="text-gray-600">Todo functions.</p>
         {/* Reports/analytics go here */}
@@ -86,20 +81,20 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-sky-50 to-blue-100">
+    <div className="min-h-screen flex bg-gradient-to-br from-theme-50 to-theme-100">
       {/* Sidebar */}
       <aside
         className={`
-          fixed z-40 inset-y-0 left-0 w-72 bg-white border-r border-sky-200 shadow-lg transform
+          fixed z-40 inset-y-0 left-0 w-72 bg-white border-r border-theme-200 shadow-lg transform
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           transition-transform duration-200 ease-in-out
           lg:translate-x-0 lg:static lg:inset-0
         `}
       >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-sky-100">
-          <span className="text-2xl font-extrabold text-sky-700 tracking-tight">pharmaDesk</span>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-theme-100">
+          <span className="text-2xl font-extrabold text-theme-700 tracking-tight">pharmaDesk</span>
           <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="w-7 h-7 text-gray-400 hover:text-sky-700" />
+            <X className="w-7 h-7 text-gray-400 hover:text-theme-700" />
           </button>
         </div>
         <nav className="mt-8">
@@ -109,8 +104,8 @@ const Home = () => {
                 <button
                   className={`flex items-center w-full px-7 py-3 rounded-lg text-lg font-medium transition
                     ${active === item.name
-                      ? 'bg-sky-500 text-white shadow'
-                      : 'text-gray-700 hover:bg-sky-100 hover:text-sky-900'
+                      ? 'bg-theme-500 text-white shadow'
+                      : 'text-gray-700 hover:bg-theme-100 hover:text-theme-900'
                     }`}
                   onClick={() => {
                     setActive(item.name);
@@ -124,7 +119,7 @@ const Home = () => {
             ))}
           </ul>
         </nav>
-        <div className="absolute bottom-0 w-full px-6 py-5 border-t border-sky-100">
+        <div className="absolute bottom-0 w-full px-6 py-5 border-t border-theme-100">
           <button className="flex items-center space-x-2 text-gray-500 hover:text-red-600 font-medium w-full justify-center">
             <LogOut className="w-5 h-5" />
             <span>Logout</span>
@@ -135,22 +130,22 @@ const Home = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:ml-0 min-h-screen">
         {/* Top Bar with Breadcrumb */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-sky-100 flex items-center px-6 py-4 shadow-sm">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-theme-100 flex items-center px-6 py-4 shadow-sm">
           <button
-            className="lg:hidden mr-4 p-2 rounded-md text-sky-600 hover:text-sky-900 hover:bg-sky-100"
+            className="lg:hidden mr-4 p-2 rounded-md text-theme-600 hover:text-theme-900 hover:bg-theme-100"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="w-7 h-7" />
           </button>
           <nav className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-2 text-base text-gray-500">
-              <span className="capitalize font-semibold text-sky-700">Home</span>
+              <span className="capitalize font-semibold text-theme-700">Home</span>
               <ChevronRight className="w-5 h-5 text-gray-300" />
-              <span className="font-bold text-sky-900">{active}</span>
+              <span className="font-bold text-theme-900">{active}</span>
             </div>
             <button
               onClick={() => navigate('/profile')}
-              className="p-2 rounded-full bg-sky-100 hover:bg-sky-200 text-sky-600 transition-colors"
+              className="p-2 rounded-full bg-theme-100 hover:bg-theme-200 text-theme-600 transition-colors"
             >
               <UserCircle className="w-6 h-6" />
             </button>

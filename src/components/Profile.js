@@ -240,7 +240,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-aqua-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading profile...</p>
         </div>
       </div>
@@ -250,17 +250,17 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Card */}
-      <div className="bg-sky-50 rounded-lg p-6 mb-6 shadow-sm">
+      <div className="bg-theme-50 rounded-lg p-6 mb-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <div className="w-20 h-20 bg-aqua-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-20 h-20 bg-theme-500 rounded-full flex items-center justify-center">
               <User size={32} className="text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {userData.firstName} {userData.lastName}
               </h1>
-              <p className="text-aqua-blue-600 font-medium">{userData.role}</p>
+              <p className="text-theme-600 font-medium">{userData.role}</p>
               <p className="text-gray-600 text-sm">{userData.email}</p>
             </div>
           </div>
@@ -268,14 +268,14 @@ const Profile = () => {
             <button
               onClick={handleEditProfile}
               disabled={isEditing}
-              className="flex items-center space-x-2 bg-aqua-blue-500 text-white px-4 py-2 rounded-lg hover:bg-aqua-blue-600 transition-colors duration-200 disabled:opacity-50"
+              className="flex items-center space-x-2 bg-theme-500 text-white px-4 py-2 rounded-lg hover:bg-theme-600 transition-colors duration-200 disabled:opacity-50"
             >
               <Edit size={16} />
               <span>Edit Profile</span>
             </button>
             <button
               onClick={() => setShowPasswordModal(true)}
-              className="flex items-center space-x-2 border border-aqua-blue-500 text-aqua-blue-500 px-4 py-2 rounded-lg hover:bg-aqua-blue-50 transition-colors duration-200"
+              className="flex items-center space-x-2 border border-theme-500 text-theme-500 px-4 py-2 rounded-lg hover:bg-theme-50 transition-colors duration-200"
             >
               <Lock size={16} />
               <span>Change Password</span>
@@ -300,7 +300,7 @@ const Profile = () => {
               value={userData.firstName}
               onChange={(e) => handleInputChange('firstName', e.target.value)}
               readOnly={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
             />
           </div>
           <div>
@@ -310,7 +310,7 @@ const Profile = () => {
               value={userData.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
               readOnly={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
             />
           </div>
           <div>
@@ -320,7 +320,7 @@ const Profile = () => {
               value={userData.phoneNumber}
               onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               readOnly={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
             />
           </div>
           <div>
@@ -330,7 +330,7 @@ const Profile = () => {
               value={userData.dateOfBirth}
               onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
               readOnly={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
             />
           </div>
           <div>
@@ -360,7 +360,7 @@ const Profile = () => {
               onChange={(e) => handleInputChange('address', e.target.value)}
               readOnly={!isEditing}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
             />
           </div>
         </div>
@@ -376,7 +376,7 @@ const Profile = () => {
                 value={userData.aadharNumber}
                 onChange={(e) => handleInputChange('aadharNumber', e.target.value)}
                 readOnly={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
               />
             </div>
             <div>
@@ -386,7 +386,7 @@ const Profile = () => {
                 value={userData.panCard}
                 onChange={(e) => handleInputChange('panCard', e.target.value)}
                 readOnly={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
               />
             </div>
             <div>
@@ -396,7 +396,7 @@ const Profile = () => {
                 value={userData.accountNumber}
                 onChange={(e) => handleInputChange('accountNumber', e.target.value)}
                 readOnly={!isEditing}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent transition duration-200"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent transition duration-200"
               />
             </div>
             <div>
@@ -418,7 +418,7 @@ const Profile = () => {
             <button
               onClick={handleSaveChanges}
               disabled={isLoading}
-              className="flex items-center space-x-2 bg-aqua-blue-500 text-white px-6 py-2 rounded-lg hover:bg-aqua-blue-600 transition-colors duration-200 disabled:opacity-50"
+              className="flex items-center space-x-2 bg-theme-500 text-white px-6 py-2 rounded-lg hover:bg-theme-600 transition-colors duration-200 disabled:opacity-50"
             >
               <Save size={16} />
               <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
@@ -477,7 +477,7 @@ const Profile = () => {
                     type={showPasswords.current ? "text" : "password"}
                     value={passwordData.currentPassword}
                     onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -496,7 +496,7 @@ const Profile = () => {
                     type={showPasswords.new ? "text" : "password"}
                     value={passwordData.newPassword}
                     onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -515,7 +515,7 @@ const Profile = () => {
                     type={showPasswords.confirm ? "text" : "password"}
                     value={passwordData.confirmPassword}
                     onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-aqua-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500 focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -547,7 +547,7 @@ const Profile = () => {
                 </button>
                 <button
                   onClick={handleChangePassword}
-                  className="flex-1 bg-aqua-blue-500 text-white px-4 py-2 rounded-lg hover:bg-aqua-blue-600 transition-colors duration-200"
+                  className="flex-1 bg-theme-500 text-white px-4 py-2 rounded-lg hover:bg-theme-600 transition-colors duration-200"
                 >
                   Change Password
                 </button>
@@ -560,4 +560,4 @@ const Profile = () => {
   );
 };
 
-export default Profile; 
+export default Profile;
