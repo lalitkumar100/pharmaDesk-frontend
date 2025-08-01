@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ArrowLeft, Search, ChevronDown, Eye, X, Edit, Save, Trash2, RotateCcw } from 'lucide-react';
-
-const API_BASE_URL = 'https://your-api-base-url.com';
+const API_BASE_URL = 'http://localhost:4000';
 
 const StockManagement = () => {
   const [medicines, setMedicines] = useState([]);
@@ -258,19 +257,7 @@ const StockManagement = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-        <div className="px-4 py-3 flex items-center space-x-3">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <span className="hover:text-gray-900">/home</span>
-            <span className="text-gray-400">&gt;</span>
-            <span className="text-gray-900 font-medium">Stock Management</span>
-          </nav>
-        </div>
-      </header>
+  
 
       {/* Sticky Control Section */}
       <div className="sticky top-16 z-40 bg-white shadow-sm border-b border-gray-200">

@@ -23,7 +23,7 @@ function App() {
         <Route path="/staff/update/:id" element={<EmployeeForm mode="update" />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path='/addStock' element={<AddStock />} />
-        <Route path='/stock-management' element={<StockManagement />} />
+        <Route path='/stock' element={<StockManagement />} />
    
       </Routes>
     </div>

@@ -1,31 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, ChevronDown, UserCircle, Mail, Phone, Building2,
-  Calendar, DollarSign, CreditCard, MapPin, X, ExternalLink ,Plus
+  Calendar, DollarSign, CreditCard, MapPin, X, Plus
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// ...existing code...
-
-
-
-
-  // ...rest of your code...
-
-
-
-
-      // Get token from localStorage
-      const token = localStorage.getItem('token') || "";
-  
-
 const StaffDirectory = () => {
   // State management
-    // ...existing state...
-  const navigate = useNavigate(); // <-- Add this line
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
-  const [query, setQuery] = useState('name');
+  const [query, setQuery] = useState('first_name'); // Changed default to 'first_name' to match new filter option
   const [searchValue, setSearchValue] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [loading, setLoading] = useState(false);
@@ -33,6 +18,9 @@ const StaffDirectory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Get token from localStorage
+  const token = localStorage.getItem('token') || "";
 
   // Filter options
   const filterOptions = [
@@ -43,8 +31,8 @@ const StaffDirectory = () => {
   ];
 
   const sortOptions = [
-    { value: 'name-asc', label: 'Name (A-Z)' },
-    { value: 'name-desc', label: 'Name (Z-A)' },
+    { value: 'first_name-asc', label: 'Name (A-Z)' },
+    { value: 'first_name-desc', label: 'Name (Z-A)' },
     { value: 'role-asc', label: 'Role (A-Z)' },
     { value: 'role-desc', label: 'Role (Z-A)' }
   ];
@@ -105,19 +93,14 @@ const StaffDirectory = () => {
       setLoading(true);
       setError(null);
       try {
-        // Replace with actual API call
-        // const response = await axios.get(`/api/employees/search?${query}=${searchValue}`);
-        // setEmployees(response.data);
-        
-        // Mock search functionality
-     const response = await axios.get(`http://localhost:4000/admin/employeeSearch?${query}=${searchValue}`, {
+       const response = await axios.get(`http://localhost:4000/admin/employeeSearch?${query}=${searchValue}`, {
           headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
-      });
-       console.log(response);
-       setEmployees(response.data.employees);
+          }
+        });
+        console.log(response);
+        setEmployees(response.data.employees);
       } catch (err) {
         setError('Search failed. Please try again.');
         console.error('Error searching employees:', err);
@@ -130,32 +113,34 @@ const StaffDirectory = () => {
   // Sort employees based on current sortOrder
   const sortedEmployees = [...employees].sort((a, b) => {
     const [field, direction] = sortOrder.split('-');
+    const aValue = field === 'name' ? `${a.first_name} ${a.last_name}` : a[field];
+    const bValue = field === 'name' ? `${b.first_name} ${b.last_name}` : b[field];
+
     if (direction === 'asc') {
-      return a[field].localeCompare(b[field]);
+      return aValue.localeCompare(bValue);
     }
-    return b[field].localeCompare(a[field]);
+    return bValue.localeCompare(aValue);
   });
 
   return (
-    <div className="min-h-full bg-gray-100 p-6">
+    <div className="min-h-full bg-theme-50 p-6 font-sans">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Staff Directory</h1>
         <p className="text-gray-600 text-lg">
           View and manage your pharmacy staff members
         </p>
       </div>
 
-
-<div className="flex justify-end mb-4">
-  <button
-    onClick={() => navigate('/staff/add')}
-    className="flex items-center gap-2 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-5 py-2 rounded-lg shadow transition-colors"
-  >
-    <Plus className="w-5 h-5" />
-    Add Employee
-  </button>
-</div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => navigate('/staff/add')}
+          className="flex items-center gap-2 bg-theme-500 hover:bg-theme-600 text-white font-semibold px-5 py-2 rounded-lg shadow-lg transition-colors"
+        >
+          <Plus className="w-5 h-5" />
+          Add Employee
+        </button>
+      </div>
 
       {/* Search and Filter Section */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-8">
@@ -165,7 +150,7 @@ const StaffDirectory = () => {
             <select
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 pr-8 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 pr-8 text-gray-700 focus:outline-none focus:border-theme-500 focus:ring-1 focus:ring-theme-500"
             >
               {filterOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -184,7 +169,7 @@ const StaffDirectory = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               onKeyPress={handleSearch}
               placeholder={`Search by ${query}...`}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-700 focus:outline-none focus:border-theme-500 focus:ring-1 focus:ring-theme-500"
             />
             <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
           </div>
@@ -194,7 +179,7 @@ const StaffDirectory = () => {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 pr-8 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 pr-8 text-gray-700 focus:outline-none focus:border-theme-500 focus:ring-1 focus:ring-theme-500"
             >
               {sortOptions.map(option => (
                 <option key={option.value} value={option.value}>
@@ -216,18 +201,18 @@ const StaffDirectory = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedEmployees.map((employee) => (
             <div
-              key={employee.id}
+              key={employee.employee_id}
               className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl 
                 transition-all duration-300 ease-in-out hover:-translate-y-1"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-                  <UserCircle className="w-12 h-12 text-gray-400" />
+                <div className="w-20 h-20 bg-theme-100 rounded-full flex items-center justify-center mb-4">
+                  <UserCircle className="w-12 h-12 text-theme-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {employee.name}
+                  {employee.first_name} {employee.last_name}
                 </h3>
-                <span className="text-blue-600 mb-4">{employee.role}</span>
+                <span className="text-theme-600 mb-4">{employee.role}</span>
                 <div className="flex items-center text-gray-600 mb-2">
                   <Mail className="w-4 h-4 mr-2" />
                   <span className="text-sm">{employee.email}</span>
@@ -238,7 +223,7 @@ const StaffDirectory = () => {
                 </div>
                 <button
                   onClick={() => handleViewDetails(employee.employee_id)}
-                  className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition-colors"
+                  className="bg-theme-600 text-white rounded-lg px-4 py-2 hover:bg-theme-700 transition-colors"
                 >
                   View Details
                 </button>
@@ -271,7 +256,7 @@ const StaffDirectory = () => {
             {/* Modal Content */}
             {isLoading ? (
               <div className="p-6 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-900 mx-auto"></div>
                 <p className="mt-2 text-gray-600">Loading employee details...</p>
               </div>
             ) : selectedEmployee ? (
@@ -279,17 +264,17 @@ const StaffDirectory = () => {
                 <div className="flex flex-col md:flex-row gap-8">
                   {/* Left Column - Photo and Basic Info */}
                   <div className="md:w-1/3 flex flex-col items-center">
-                    <div className="w-40 h-40 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-                      <UserCircle className="w-24 h-24 text-gray-400" />
+                    <div className="w-40 h-40 bg-theme-100 rounded-full flex items-center justify-center mb-4">
+                      <UserCircle className="w-24 h-24 text-theme-400" />
                     </div>
                     <h3 className="text-xl font-semibold text-center">
                       {`${selectedEmployee.first_name} ${selectedEmployee.last_name}`}
                     </h3>
                     <span className={`
                       px-3 py-1 rounded-full text-sm font-medium mt-2
-                      ${selectedEmployee.status === 'Active' ? 'text-green-700 bg-green-100' :
-                        selectedEmployee.status === 'Suspended' ? 'text-red-700 bg-red-100' :
-                        'text-blue-700 bg-blue-100'}
+                      ${selectedEmployee.role === 'Active' ? 'text-green-700 bg-green-100' :
+                        selectedEmployee.role === 'Suspended' ? 'text-red-700 bg-red-100' :
+                        'text-theme-700 bg-theme-100'}
                     `}>
                       {selectedEmployee.role}
                     </span>
@@ -369,13 +354,12 @@ const StaffDirectory = () => {
               >
                 Close
               </button>
-
-<button
-  onClick={() => navigate(`/staff/update/${selectedEmployee.employee_id}`)}
-  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
->
-  Update Staff
-</button>
+              <button
+                onClick={() => navigate(`/staff/update/${selectedEmployee.employee_id}`)}
+                className="px-4 py-2 bg-theme-600 text-white rounded-lg hover:bg-theme-700"
+              >
+                Update Staff
+              </button>
             </div>
           </div>
         </div>
