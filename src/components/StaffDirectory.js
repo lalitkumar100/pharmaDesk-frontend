@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, ChevronDown, UserCircle, Mail, Phone, Building2,
-  Calendar, DollarSign, CreditCard, MapPin, X, Plus
+  Search, ChevronDown, UserCircle, Mail, Phone, Calendar, DollarSign, CreditCard, MapPin, X, Plus
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const StaffDirectory = () => {
-  // State management
   const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
-  const [query, setQuery] = useState('first_name'); // Changed default to 'first_name' to match new filter option
+  const [query, setQuery] = useState('first_name');
   const [searchValue, setSearchValue] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [loading, setLoading] = useState(false);
@@ -19,10 +17,8 @@ const StaffDirectory = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get token from localStorage
   const token = localStorage.getItem('token') || "";
 
-  // Filter options
   const filterOptions = [
     { value: 'first_name', label: 'Name' },
     { value: 'role', label: 'Role' },
@@ -37,7 +33,6 @@ const StaffDirectory = () => {
     { value: 'role-desc', label: 'Role (Z-A)' }
   ];
 
-  // Function to fetch employee details
   const fetchEmployeeDetails = async (id) => {
     setIsLoading(true);
     try {
@@ -56,13 +51,11 @@ const StaffDirectory = () => {
     }
   };
 
-  // Handler for View Details button
   const handleViewDetails = async (employeeId) => {
     setIsModalOpen(true);
     await fetchEmployeeDetails(employeeId);
   };
 
-  // Fetch employees on component mount
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -78,7 +71,6 @@ const StaffDirectory = () => {
         }
       });
       setEmployees(response.data.employees);
-  
     } catch (err) {
       setError('Failed to fetch employees. Please try again later.');
       console.error('Error fetching employees:', err);
@@ -87,19 +79,17 @@ const StaffDirectory = () => {
     }
   };
 
-  // Search handler
   const handleSearch = async (e) => {
     if (e.key === 'Enter') {
       setLoading(true);
       setError(null);
       try {
-       const response = await axios.get(`http://localhost:4000/admin/employeeSearch?${query}=${searchValue}`, {
+        const response = await axios.get(`http://localhost:4000/admin/employeeSearch?${query}=${searchValue}`, {
           headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
-        console.log(response);
         setEmployees(response.data.employees);
       } catch (err) {
         setError('Search failed. Please try again.');
@@ -110,7 +100,6 @@ const StaffDirectory = () => {
     }
   };
 
-  // Sort employees based on current sortOrder
   const sortedEmployees = [...employees].sort((a, b) => {
     const [field, direction] = sortOrder.split('-');
     const aValue = field === 'name' ? `${a.first_name} ${a.last_name}` : a[field];
@@ -123,28 +112,28 @@ const StaffDirectory = () => {
   });
 
   return (
-    <div className="min-h-full bg-theme-50 p-6 font-sans">
+    <div className="min-h-full bg-theme-50 p-4 sm:p-6 font-sans">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-8 mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Staff Directory</h1>
-        <p className="text-gray-600 text-lg">
+      <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-6 sm:p-8 mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Staff Directory</h1>
+        <p className="text-gray-600 text-base sm:text-lg">
           View and manage your pharmacy staff members
         </p>
       </div>
 
       <div className="flex justify-end mb-4">
         <button
-          onClick={() => navigate('/staff/add')}
-          className="flex items-center gap-2 bg-theme-500 hover:bg-theme-600 text-white font-semibold px-5 py-2 rounded-lg shadow-lg transition-colors"
+          onClick={() => navigate('/home/staff/add')}
+          className="flex items-center gap-2 bg-theme-500 hover:bg-theme-600 text-white font-semibold px-4 sm:px-5 py-2 rounded-lg shadow-lg transition-colors"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
           Add Employee
         </button>
       </div>
 
       {/* Search and Filter Section */}
-      <div className="bg-white rounded-lg shadow-md p-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row gap-4">
           {/* Filter Dropdown */}
           <div className="relative flex-1">
             <select
@@ -198,18 +187,18 @@ const StaffDirectory = () => {
       ) : error ? (
         <div className="text-center text-red-600">{error}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {sortedEmployees.map((employee) => (
             <div
               key={employee.employee_id}
-              className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl 
+              className="bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl 
                 transition-all duration-300 ease-in-out hover:-translate-y-1"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-theme-100 rounded-full flex items-center justify-center mb-4">
-                  <UserCircle className="w-12 h-12 text-theme-400" />
+                <div className="w-16 sm:w-20 h-16 sm:h-20 bg-theme-100 rounded-full flex items-center justify-center mb-4">
+                  <UserCircle className="w-10 sm:w-12 h-10 sm:h-12 text-theme-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
                   {employee.first_name} {employee.last_name}
                 </h3>
                 <span className="text-theme-600 mb-4">{employee.role}</span>
@@ -238,10 +227,10 @@ const StaffDirectory = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-4 sm:p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Staff Member Details</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Staff Member Details</h2>
                   <p className="text-gray-600">Comprehensive information about this staff member</p>
                 </div>
                 <button 
@@ -260,28 +249,27 @@ const StaffDirectory = () => {
                 <p className="mt-2 text-gray-600">Loading employee details...</p>
               </div>
             ) : selectedEmployee ? (
-              <div className="p-6">
-                <div className="flex flex-col md:flex-row gap-8">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
                   {/* Left Column - Photo and Basic Info */}
                   <div className="md:w-1/3 flex flex-col items-center">
-                    <div className="w-40 h-40 bg-theme-100 rounded-full flex items-center justify-center mb-4">
-                      <UserCircle className="w-24 h-24 text-theme-400" />
+                    <div className="w-32 sm:w-40 h-32 sm:h-40 bg-theme-100 rounded-full flex items-center justify-center mb-4">
+                      <UserCircle className="w-20 sm:w-24 h-20 sm:h-24 text-theme-400" />
                     </div>
-                    <h3 className="text-xl font-semibold text-center">
+                    <h3 className="text-lg sm:text-xl font-semibold text-center">
                       {`${selectedEmployee.first_name} ${selectedEmployee.last_name}`}
                     </h3>
-                    <span className={`
-                      px-3 py-1 rounded-full text-sm font-medium mt-2
-                      ${selectedEmployee.role === 'Active' ? 'text-green-700 bg-green-100' :
-                        selectedEmployee.role === 'Suspended' ? 'text-red-700 bg-red-100' :
-                        'text-theme-700 bg-theme-100'}
-                    `}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium mt-2 ${
+                      selectedEmployee.role === 'Active' ? 'text-green-700 bg-green-100' :
+                      selectedEmployee.role === 'Suspended' ? 'text-red-700 bg-red-100' :
+                      'text-theme-700 bg-theme-100'
+                    }`}>
                       {selectedEmployee.role}
                     </span>
                   </div>
 
                   {/* Right Column - Details */}
-                  <div className="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-center space-x-3">
                       <Mail className="w-5 h-5 text-gray-400" />
                       <div>
@@ -347,7 +335,7 @@ const StaffDirectory = () => {
             )}
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-4">
+            <div className="p-4 sm:p-6 border-t border-gray-200 flex justify-end space-x-4">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
@@ -355,12 +343,13 @@ const StaffDirectory = () => {
                 Close
               </button>
               <button
-                onClick={() => navigate(`/staff/update/${selectedEmployee.employee_id}`)}
+                onClick={() => navigate(`/home/staff/update/${selectedEmployee.employee_id}`)}
                 className="px-4 py-2 bg-theme-600 text-white rounded-lg hover:bg-theme-700"
               >
                 Update Staff
               </button>
             </div>
+            
           </div>
         </div>
       )}

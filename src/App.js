@@ -3,31 +3,31 @@ import { Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Home from './components/Home';
 import Profile from './components/Profile';
-import EmployeeForm from './components/EmployeeForm';
-import ForgotPassword from   './components/ForgotPassword';
-import AddStock from './components/AddStock';
-import StockManagement from './components/StockManagement';
+import ForgotPassword from './components/ForgotPassword';
 
-// In your routes configuration
-
+import Billing from './components/Billing';
+// We'll move the imports for AddStock and StockManagement into the Home component
 
 function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        {/* These routes will not have the Home layout */}
         <Route path="/" element={<Login />} />
-        <Route path="/staff/add" element={<EmployeeForm mode="add" />} />
-        <Route path="/staff/update/:id" element={<EmployeeForm mode="update" />} />
+        <Route path='/billing' element={<Billing />}/>
+        <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path='/addStock' element={<AddStock />} />
-        <Route path='/stock' element={<StockManagement />} />
+        
+        {/*
+          This is the new parent route for all dashboard-related pages.
+          The '*' means that any path starting with "/home" will match.
+        */}
+        <Route path="/home/*" element={<Home />} />
    
       </Routes>
     </div>
   );
 }
 
-export default App; 
+export default App;
