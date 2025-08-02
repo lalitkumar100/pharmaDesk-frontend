@@ -1,14 +1,51 @@
 import React, { useState } from "react";
 import axios from "axios";
-
-// Assuming AddMedicineModal is also designed to be responsive
-import AddMedicineModal from "./AddMedicineModal";
+import { Shell } from "lucide-react"; // Importing the Bot icon for the AI button
 
 // Placeholder for AddMedicineModal to make the code runnable without external files
+const AddMedicineModal = ({ onClose, onAddMedicine }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Add Medicine</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            &times;
+          </button>
+        </div>
+        <p>This is a placeholder modal. Add your form fields here.</p>
+        <div className="mt-4 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300">
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              // Example of adding a new medicine
+              onAddMedicine({
+                medicine_name: "New Med",
+                brand_name: "Brand X",
+                mfg_date: "2023-01-01",
+                expiry_date: "2025-01-01",
+                packed_type: "Tablet",
+                stock_quantity: 100,
+                purchase_price: 10.50,
+                mrp: 15.00,
+                batch_no: "BATCH123"
+              });
+              onClose();
+            }}
+            className="px-4 py-2 rounded-md text-white bg-theme-600 hover:bg-theme-700"
+          >
+            Add Medicine
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const BASE_URL = "http://localhost:4000";
-// In a real application, consider managing tokens more securely (e.g., React Context, Redux)
-// and fetching them dynamically rather than directly from localStorage at the top level.
 const token = localStorage.getItem("token") || "";
 
 function StockEntry() {
@@ -35,6 +72,17 @@ function StockEntry() {
    */
   const handleDeleteMedicine = (idx) => {
     setMedicines((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  /**
+   * Placeholder function for the new AI image processing button.
+   * In a real app, this would open a modal or navigate to a new page
+   * to handle image upload and processing.
+   */
+  const handleImageEntry = () => {
+    console.log("Image entry button clicked. Implement your image processing logic here!");
+    // You would typically open a new modal or a file input here.
+    // For example, you could show a modal with a file upload field.
   };
 
   /**
@@ -106,11 +154,20 @@ function StockEntry() {
   };
 
   return (
-    // Removed min-h-screen here, as the parent Home.js's main div is already managing height and overflow.
-    // The flex-1 class remains to ensure it takes up available space within a flex parent.
     <div className="flex flex-col w-full font-sans bg-gray-100 flex-1">
-      
-  
+      {/* New AI-powered button, placed above the form */}
+      <div className="w-full max-w-5xl px-4 mx-auto mt-6 sm:px-6">
+        <button
+          type="button"
+          onClick={handleImageEntry}
+          className="flex items-center justify-center w-full px-5 py-2 text-base font-medium text-white transition-colors rounded-lg shadow-sm bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 md:w-auto"
+        >
+    
+            <Shell className="w-5 h-5 mr-2" />
+          Entry purchase bill by img
+        </button>
+      </div>
+
       {/* Form Container */}
       <form
         onSubmit={handleSubmit}
@@ -185,7 +242,6 @@ function StockEntry() {
             <table className="min-w-full text-sm divide-y divide-theme-200">
               <thead className="text-theme-800 bg-theme-100">
                 <tr>
-                  {/* Added min-w classes for better column sizing on smaller screens if needed */}
                   {[
                     "Medicine Name",
                     "Brand",

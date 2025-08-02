@@ -9,7 +9,8 @@ import {
   ChevronRight,
   LogOut,
   UserCircle,
-  ShoppingBag, // Added a new icon for the "New Sale" button
+  ShoppingBag,
+  Shell,
 } from 'lucide-react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -20,6 +21,9 @@ import StockManagement from './StockManagement';
 import EmployeeForm from './EmployeeForm';
 import StaffDirectory from './StaffDirectory';
 import Billing from './Billing';
+
+// Import the Chatbot App component
+import ChatbotApp from './ChatbotApp'; // Assuming your chatbot component is in App.js
 
 // Define menu items with their names, icons, and paths
 const menuItems = [
@@ -56,27 +60,17 @@ const Dashboard = () => (
 
 const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatSidebarOpen, setChatSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  /**
-   * Determines if a menu item should be highlighted as active based on the current URL path.
-   * @param {string} path - The path of the menu item.
-   * @returns {boolean} True if the menu item is active, false otherwise.
-   */
   const isMenuItemActive = (path) => {
-    // Special case for dashboard to match only the exact path to avoid false positives
     if (path === '/home') {
       return location.pathname === '/home';
     }
-    // For other paths, check if the current location's pathname starts with the menu item's path
     return location.pathname.startsWith(path);
   };
 
-  /**
-   * Gets the title of the current page to display in the header breadcrumb.
-   * @returns {string} The title of the current page.
-   */
   const getCurrentPageTitle = () => {
     const currentPath = location.pathname;
     const activeItem = menuItems.find(item => isMenuItemActive(item.path));
@@ -85,27 +79,26 @@ const Home = () => {
       return activeItem.name;
     }
 
-    // Handle specific cases for dynamic routes or nested pages
     if (currentPath.startsWith('/home/staff/add')) {
       return 'Add Staff';
     }
     if (currentPath.startsWith('/home/staff/update')) {
       return 'Update Staff';
     }
-    // Fallback to Dashboard if no specific match is found
     return 'Dashboard';
   };
 
-  // Handler for the new button
   const handleNewSaleClick = () => {
-    // This is where you would define the action for the button, e.g., navigate to a new sale page
-    navigate('/home/billing');
-    // Example: navigate('/home/new-sale');
+    navigate('/billing');
+  };
+
+  const handleChatToggle = () => {
+    setChatSidebarOpen(!chatSidebarOpen);
   };
 
   return (
     <div className="relative z-0 min-h-screen flex bg-gradient-to-br from-theme-50 to-theme-100">
-      {/* Sidebar - Responsive for mobile (fixed, slide-in) and desktop (static) */}
+      {/* Existing Sidebar */}
       <aside
         className={`
           fixed z-50 inset-y-0 left-0 w-64 sm:w-72 bg-white border-r border-theme-200 shadow-lg transform
@@ -118,14 +111,12 @@ const Home = () => {
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-theme-100">
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-theme-700 rounded-full flex items-center justify-center">
-              {/* Pharmacy icon (simple SVG) */}
               <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
               </svg>
             </div>
             <span className="text-xl sm:text-2xl font-extrabold text-theme-700 tracking-tight">pharmaDesk</span>
           </div>
-          {/* Close sidebar button for mobile */}
           <button className="lg:hidden p-2 rounded-md hover:bg-theme-100" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
             <X className="w-6 sm:w-7 h-6 sm:h-7 text-gray-400 hover:text-theme-700" />
           </button>
@@ -172,10 +163,10 @@ const Home = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top Bar with Breadcrumb and Profile Icon */}
+        {/* Top Bar */}
         <header
           className={`
-            sticky top-0 ${sidebarOpen ? 'z-10' : 'z-30'}
+            sticky top-0 ${sidebarOpen || chatSidebarOpen ? 'z-10' : 'z-30'}
             bg-white/80 backdrop-blur border-b border-theme-100
             flex items-center px-4 sm:px-6 py-3 sm:py-4 shadow-sm
           `}
@@ -207,8 +198,7 @@ const Home = () => {
         </header>
 
         {/* Page Content Area - This is where your routed components render */}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-64px)] relative">
-          {/* Define your routes here */}
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto relative">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="staff" element={<StaffDirectory />} />
@@ -217,7 +207,7 @@ const Home = () => {
             <Route path="addStock" element={<AddStock />} />
             <Route path="stock" element={<StockManagement />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="billing" element={<Billing />} /> {/* Add this line */}
+            <Route path="billing" element={<Billing />} />
             <Route path="todo" element={
               <div className="p-4 sm:p-6 bg-white rounded-lg shadow-lg">
                 <h1 className="text-2xl md:text-3xl font-extrabold mb-4 text-theme-700">Todo List</h1>
@@ -234,13 +224,42 @@ const Home = () => {
       <button
         onClick={handleNewSaleClick}
         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-theme-600 text-white shadow-lg
-                   hover:bg-theme-700 transition-colors duration-200 ease-in-out
-                   px-6 py-3 rounded-full flex items-center space-x-2
-                   text-lg font-semibold"
+                     hover:bg-theme-700 transition-colors duration-200 ease-in-out
+                     px-6 py-3 rounded-full flex items-center space-x-2
+                     text-lg font-semibold"
       >
         <ShoppingBag className="w-6 h-6" />
         <span>New Sale</span>
       </button>
+
+      {/* Shell button to toggle chat sidebar */}
+      <button
+        onClick={handleChatToggle}
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg
+                     hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+        aria-label="Open chat"
+      >
+        <Shell className="w-6 h-6" />
+      </button>
+
+      {/* The Chatbot Sidebar (using ChatbotApp component) */}
+      <div
+        className={`fixed top-0 right-0 h-full flex flex-col shadow-2xl transition-transform duration-300 ease-in-out
+          ${chatSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+          max-sm:w-full sm:w-96 md:w-80 lg:w-96 // Responsive width
+          z-[60]
+        `}
+      >
+        <ChatbotApp onClose={handleChatToggle} />
+      </div>
+
+      {/* Overlay for chat sidebar - shows only on mobile */}
+      {chatSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-50 sm:hidden"
+          onClick={handleChatToggle}
+        ></div>
+      )}
     </div>
   );
 };

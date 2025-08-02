@@ -23,6 +23,7 @@ function App() {
           This is the new parent route for all dashboard-related pages.
           The '*' means that any path starting with "/home" will match.
         */}
+        <Route path="/billing" element={<Billing />} /> {/* Add this line */}
         <Route path="/home/*" element={<Home />} />
    
       </Routes>
