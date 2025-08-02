@@ -13,7 +13,7 @@ import {
   Shell,
 } from 'lucide-react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-
+import BoxLoader from "./BoxLoader";
 // Import all the components that will be rendered inside Home
 import Reports from './Reports';
 import AddStock from './AddStock';

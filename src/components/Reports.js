@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, FileText, Calendar, BarChart3, ChevronRight } from 'lucide-react';
-
+import BoxLoader from "./BoxLoader";
 const reportCards = [
   {
     id: 1,

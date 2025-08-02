@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Shell } from "lucide-react"; // Importing the Bot icon for the AI button
-
+import BoxLoader from "./BoxLoader";
 // Placeholder for AddMedicineModal to make the code runnable without external files
 const AddMedicineModal = ({ onClose, onAddMedicine }) => {
   return (

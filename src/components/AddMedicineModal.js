@@ -1,6 +1,7 @@
 // src/components/AddMedicineModal.js
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import BoxLoader from "./BoxLoader";
 
 const BASE_URL = "http://localhost:4000";
 // Get token from localStorage

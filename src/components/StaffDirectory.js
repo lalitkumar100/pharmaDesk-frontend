@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import BoxLoader from "./BoxLoader";
 const StaffDirectory = () => {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);

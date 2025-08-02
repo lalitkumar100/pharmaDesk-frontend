@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ArrowLeft, Search, ChevronDown, Eye, X, Edit, Save, Trash2, RotateCcw } from 'lucide-react';
 const API_BASE_URL = 'http://localhost:4000';
-
+import BoxLoader from "./BoxLoader";
 const StockManagement = () => {
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(false);

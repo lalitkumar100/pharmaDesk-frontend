@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Calendar, MapPin, User, Users, Briefcase, DollarSign } from 'lucide-react';
 import axios from 'axios';
-
+import BoxLoader from "./BoxLoader";
 const EmployeeForm = ({ mode = 'add' }) => {
   const navigate = useNavigate();
   const { id } = useParams();

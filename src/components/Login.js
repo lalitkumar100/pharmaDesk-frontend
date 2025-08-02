@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-
+import BoxLoader from "./BoxLoader";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -142,7 +142,7 @@ const Login = () => {
             <div className="text-center text-sm text-gray-500">
               Need help? Contact{' '}
               <a href="mailto:help@pharmaDesk.com" className="text-theme-600 hover:text-theme-700">
-                help@pharmaDesk.com
+                help.pharmadesk@gmail.com
               </a>
             </div>
             

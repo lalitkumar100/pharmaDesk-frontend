@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shell } from 'lucide-react'; // Import the Shell icon
-
+import BoxLoader from "./BoxLoader";
 // Function to generate a random color from a predefined list
 const getRandomColor = () => {
   const colors = [
