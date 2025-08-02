@@ -4,13 +4,56 @@ import BoxLoader from "./BoxLoader";
 // Function to generate a random color from a predefined list
 const getRandomColor = () => {
   const colors = [
-    '#facc15', // Tailwind yellow-400
-    '#34d399', // Tailwind green-400
-    '#60a5fa', // Tailwind blue-400
-    '#a78bfa', // Tailwind purple-400
-    '#f87171', // Tailwind red-400
-    '#e879f9', // Tailwind fuchsia-400
-  ];
+  "#333333",
+  "#000080",
+  "#228B22",
+  "#800020",
+  "#36220B",
+  "#008080",
+  "#4169E1",
+  "#9400D3",
+  "#2F4F4F",
+  "#191970",
+  "#556B2F",
+  "#8B4513",
+  "#5C4033",
+  "#006064",
+  "#8E4585",
+  "#8B008B",
+  "#4B0082",
+  "#E2725B",
+  "#264653",
+  "#000000",
+  "#000000",
+  "#003153",
+  "#5C4033",
+  "#006400",
+  "#2B3539",
+  "#36454F",
+  "#46535E",
+  "#35393C",
+  "#2F4F4F",
+  "#9966CC",
+  "#0F52BA",
+  "#50C878",
+  "#00A36C",
+  "#E0115F",
+  "#CC5500",
+  "#E34234",
+  "#954535",
+  "#B7410E",
+  "#E9967A",
+  "#003153",
+  "#008080",
+  "#6A5ACD",
+  "#228B22",
+  "#355E3B",
+  "#800020",
+  "#8B0000",
+  "#6F4E37",
+  "#36454F",
+  "#556B2F"
+]
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
@@ -25,7 +68,7 @@ const RandomColorLoader = () => {
     // Set up an interval to change the icon's color every 1 second
     const colorInterval = setInterval(() => {
       setCurrentColor(getRandomColor());
-    }, 1000); // Change color every 1000 milliseconds (1 second)
+    }, 500); // Change color every 1000 milliseconds (1 second)
 
     // Set up an interval to animate the "Loading..." dots every 0.5 seconds
     const dotsInterval = setInterval(() => {

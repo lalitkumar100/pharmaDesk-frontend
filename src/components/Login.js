@@ -29,7 +29,7 @@ const Login = () => {
       // Demo login for testing (remove this when backend is ready)
       if (formData.email === 'demo@pharmadesk.com' && formData.password === 'demo123') {
         setMessage('Login successful!');
-        localStorage.setItem('token', 'demo-token-123');
+        localStorage.setItem('token');
         setTimeout(() => {
           navigate('/home');
         }, 1000);

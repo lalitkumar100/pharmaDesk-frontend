@@ -50,9 +50,9 @@ export default function AddMedicineModal({ onClose, onAddMedicine }) {
     debounceTimeout.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${BASE_URL}/admin/medicines/recommendation?query=${encodeURIComponent(
+        const res = await axios.get(`${BASE_URL}/admin/medicines/recommendation?query=${
           fields.medicine_name
-        )}`, {
+        }`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

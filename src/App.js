@@ -4,8 +4,9 @@ import Login from './components/Login';
 import Home from './components/Home';
 import Profile from './components/Profile';
 import ForgotPassword from './components/ForgotPassword';
-
+import BoxLoader from './components/BoxLoader';
 import Billing from './components/Billing';
+import RandomColorLoader from './components/RandomColorLoader';
 // We'll move the imports for AddStock and StockManagement into the Home component
 
 function App() {
@@ -17,8 +18,9 @@ function App() {
         <Route path='/billing' element={<Billing />}/>
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        
+        <Route path="/BoxLoader" element={<BoxLoader />} />
+           <Route path="/RandomColorLoader" element={<RandomColorLoader />} />
+         <Route path="/forgot-password" element={<ForgotPassword />} />
         {/*
           This is the new parent route for all dashboard-related pages.
           The '*' means that any path starting with "/home" will match.

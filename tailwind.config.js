@@ -29,7 +29,7 @@ module.exports = {
         }
       },
       animation: {
-        'spin-slow': 'spin-slow 2s linear infinite',
+        'spin-slow': 'spin-slow 1.2s linear infinite',
       },
     },
   },
