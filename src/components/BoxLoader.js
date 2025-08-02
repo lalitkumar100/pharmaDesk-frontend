@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import BoxLoader from "./BoxLoader";
+
 // Function to generate a random color from a predefined list
 const getRandomColor = () => {
   const colors = [

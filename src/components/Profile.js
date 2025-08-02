@@ -11,7 +11,7 @@ import {
 import axios from 'axios';
 import RandomColorLoader from './RandomColorLoader'; // Import the new loader component
 import BoxLoader  from './BoxLoader';
-import BoxLoader from "./BoxLoader";
+
 const Profile = () => {
   const [userData, setUserData] = useState({
     firstName: '',

@@ -13,7 +13,7 @@ import {
   Shell,
 } from 'lucide-react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-import BoxLoader from "./BoxLoader";
+import BoxLoader from "./BoxLoader"; // Imported but not used in this snippet, assuming it's for future use.
 // Import all the components that will be rendered inside Home
 import Reports from './Reports';
 import AddStock from './AddStock';
@@ -21,42 +21,19 @@ import StockManagement from './StockManagement';
 import EmployeeForm from './EmployeeForm';
 import StaffDirectory from './StaffDirectory';
 import Billing from './Billing';
+import Dashboard from './Dashboard'; // Assuming this is the Dashboard component you want to render
 
 // Import the Chatbot App component
 import ChatbotApp from './ChatbotApp'; // Assuming your chatbot component is in App.js
 
 // Define menu items with their names, icons, and paths
 const menuItems = [
-  { name: 'Dashboard', icon: HomeIcon, path: '/home' },
+  { name: 'Dashboard', icon: HomeIcon, path: '/home' }, // Path for the main dashboard
   { name: 'Add Stock', icon: Plus, path: '/home/addStock' },
   { name: 'Stock', icon: Package, path: '/home/stock' },
   { name: 'Reports', icon: BarChart3, path: '/home/reports' },
   { name: 'Staff', icon: UserCircle, path: '/home/staff' },
-  { name: 'Todo List', icon: Menu, path: '/home/todo' },
 ];
-
-// A placeholder component for the Dashboard
-const Dashboard = () => (
-  <div className="p-4 sm:p-6 bg-white rounded-lg shadow-lg">
-    <h1 className="text-2xl md:text-3xl font-extrabold mb-4 text-theme-700">Dashboard</h1>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-      <div className="bg-theme-50 rounded-xl shadow p-4 md:p-6 flex flex-col items-center">
-        <span className="text-3xl md:text-4xl font-bold text-theme-600 mb-2">120</span>
-        <span className="text-gray-500">Total Medicines</span>
-      </div>
-      <div className="bg-theme-50 rounded-xl shadow p-4 md:p-6 flex flex-col items-center">
-        <span className="text-3xl md:text-4xl font-bold text-green-500 mb-2">15</span>
-        <span className="text-gray-500">Low Stock</span>
-      </div>
-    </div>
-    <div className="mt-6 md:mt-8">
-      <h2 className="text-lg md:text-xl font-semibold mb-2 text-theme-700">Welcome to pharmaDesk</h2>
-      <p className="text-gray-600">
-        Easily manage your pharmacy inventory, add new stock, and view insightful reports.
-      </p>
-    </div>
-  </div>
-);
 
 const Home = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -64,34 +41,43 @@ const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Function to check if a menu item is active based on the current path
   const isMenuItemActive = (path) => {
     if (path === '/home') {
+      // For the dashboard, it's active if the path is exactly /home
       return location.pathname === '/home';
     }
+    // For other paths, it's active if the current path starts with the item's path
     return location.pathname.startsWith(path);
   };
 
+  // Function to get the title of the current page for the breadcrumb
   const getCurrentPageTitle = () => {
     const currentPath = location.pathname;
+    // Find the active menu item
     const activeItem = menuItems.find(item => isMenuItemActive(item.path));
 
     if (activeItem) {
       return activeItem.name;
     }
 
+    // Handle specific sub-paths for staff management
     if (currentPath.startsWith('/home/staff/add')) {
       return 'Add Staff';
     }
     if (currentPath.startsWith('/home/staff/update')) {
       return 'Update Staff';
     }
+    // Default title if no specific match is found
     return 'Dashboard';
   };
 
+  // Handler for the "New Sale" button
   const handleNewSaleClick = () => {
     navigate('/billing');
   };
 
+  // Handler for toggling the chat sidebar
   const handleChatToggle = () => {
     setChatSidebarOpen(!chatSidebarOpen);
   };
@@ -200,7 +186,8 @@ const Home = () => {
         {/* Page Content Area - This is where your routed components render */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto relative">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            {/* Default route for /home, renders the Dashboard */}
+            <Route index element={<Dashboard />} /> {/* This makes /home render Dashboard */}
             <Route path="staff" element={<StaffDirectory />} />
             <Route path="staff/add" element={<EmployeeForm mode="add" />} />
             <Route path="staff/update/:id" element={<EmployeeForm mode="update" />} />
@@ -208,14 +195,9 @@ const Home = () => {
             <Route path="stock" element={<StockManagement />} />
             <Route path="reports" element={<Reports />} />
             <Route path="billing" element={<Billing />} />
-            <Route path="todo" element={
-              <div className="p-4 sm:p-6 bg-white rounded-lg shadow-lg">
-                <h1 className="text-2xl md:text-3xl font-extrabold mb-4 text-theme-700">Todo List</h1>
-                <div className="bg-theme-50 rounded-xl shadow p-4 md:p-6">
-                  <p className="text-gray-600">Todo functions will be implemented here.</p>
-                </div>
-              </div>
-            } />
+            {/* The Dashboard route is now handled by the index route for /home */}
+            {/* If you specifically want /home/dashboard to work, you can add: */}
+            {/* <Route path="dashboard" element={<Dashboard />} /> */}
           </Routes>
         </main>
       </div>
@@ -224,9 +206,9 @@ const Home = () => {
       <button
         onClick={handleNewSaleClick}
         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-theme-600 text-white shadow-lg
-                     hover:bg-theme-700 transition-colors duration-200 ease-in-out
-                     px-6 py-3 rounded-full flex items-center space-x-2
-                     text-lg font-semibold"
+                    hover:bg-theme-700 transition-colors duration-200 ease-in-out
+                    px-6 py-3 rounded-full flex items-center space-x-2
+                    text-lg font-semibold"
       >
         <ShoppingBag className="w-6 h-6" />
         <span>New Sale</span>
@@ -236,7 +218,7 @@ const Home = () => {
       <button
         onClick={handleChatToggle}
         className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg
-                     hover:bg-blue-600 transition-colors duration-200 ease-in-out"
+                    hover:bg-blue-600 transition-colors duration-200 ease-in-out"
         aria-label="Open chat"
       >
         <Shell className="w-6 h-6" />
