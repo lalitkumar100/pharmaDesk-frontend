@@ -1,85 +1,68 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Shell, Sparkles, X } from 'lucide-react'; // Import X icon for close button
+import { Shell, Sparkles, X } from 'lucide-react';
+import RandomColorLoader from './RandomColorLoader'; // Import the new component
 
-// Main App component for the chatbot interface
-// It now accepts an 'onClose' prop to handle closing the sidebar
-function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatBotApp'
-  // State to store chat messages (user and bot)
+function ChatBotApp({ onClose }) {
   const [messages, setMessages] = useState([]);
-  // State for the current text input by the user
   const [inputText, setInputText] = useState('');
-  // State for the selected image file
   const [selectedImage, setSelectedImage] = useState(null);
-  // State for the URL of the image preview
   const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
-  // State to indicate if an API call for sending message is in progress
   const [isLoading, setIsLoading] = useState(false);
-  // State to indicate if an API call for summarization is in progress
   const [isSummarizing, setIsSummarizing] = useState(false);
-  // State to store any error messages
   const [error, setError] = useState(null);
 
-  // Ref for the chat messages container to enable auto-scrolling
   const messagesEndRef = useRef(null);
-  // Ref for the textarea to dynamically adjust its height
   const textareaRef = useRef(null);
 
-  // Effect to scroll to the bottom of the chat whenever new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Effect to adjust the textarea height based on its content
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'; // Reset height
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px'; // Set to scroll height
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
     }
   }, [inputText]);
 
-  // Function to handle changes in the text input
   const handleInputChange = (e) => {
     setInputText(e.target.value);
   };
 
-  // Function to handle image file selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(file);
-      setImagePreviewUrl(URL.createObjectURL(file)); // Corrected URL.ObjectURL to URL.createObjectURL
+      setImagePreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  // Function to remove the selected image
   const handleRemoveImage = () => {
     setSelectedImage(null);
     setImagePreviewUrl(null);
     if (document.getElementById('imageUpload')) {
-      document.getElementById('imageUpload').value = ''; // Clear file input
+      document.getElementById('imageUpload').value = '';
     }
   };
 
-  // Function to convert a File object to a Base64 string
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]); // Get base64 part
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
-  // Generic function to make API calls with exponential backoff
   const callGeminiApi = async (payload, model = 'gemini-2.5-flash-preview-05-20') => {
-    const apiKey = ''; // API key is provided by the Canvas environment
+    const apiKey = '';
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     let response;
     let result;
     const maxRetries = 5;
     let retryCount = 0;
-    let delay = 1000; // Initial delay of 1 second
+    let delay = 1000;
 
     while (retryCount < maxRetries) {
       try {
@@ -91,11 +74,11 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
 
         if (response.ok) {
           result = await response.json();
-          return result; // Success, exit retry loop
+          return result;
         } else if (response.status === 429 || response.status >= 500) {
           console.warn(`API call failed with status ${response.status}. Retrying in ${delay / 1000}s...`);
           await new Promise((resolve) => setTimeout(resolve, delay));
-          delay *= 2; // Double the delay for the next retry
+          delay *= 2;
           retryCount++;
         } else {
           const errorData = await response.json();
@@ -103,7 +86,7 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
         }
       } catch (err) {
         if (retryCount === maxRetries - 1) {
-          throw err; // Re-throw if max retries reached
+          throw err;
         }
         console.error(`Fetch error (retry ${retryCount + 1}):`, err);
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -114,16 +97,14 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
     throw new Error('Max retries exceeded for API call.');
   };
 
-  // Function to send the message to the chatbot
   const handleSendMessage = async () => {
     if (!inputText.trim() && !selectedImage) {
-      return; // Don't send empty messages
+      return;
     }
 
     setIsLoading(true);
     setError(null);
 
-    // Add user message to chat history immediately
     const userMessage = {
       type: 'user',
       text: inputText.trim(),
@@ -134,7 +115,6 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
     let chatHistory = [];
 
     try {
-      // Prepare the content for the API request
       if (selectedImage) {
         const base64ImageData = await fileToBase64(selectedImage);
         chatHistory.push({
@@ -156,9 +136,7 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
       const payload = { contents: chatHistory };
       const result = await callGeminiApi(payload);
 
-      if (result && result.candidates && result.candidates.length > 0 &&
-        result.candidates[0].content && result.candidates[0].content.parts &&
-        result.candidates[0].content.parts.length > 0) {
+      if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
         const botResponseText = result.candidates[0].content.parts[0].text;
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -181,7 +159,6 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
     }
   };
 
-  // Function to summarize the chat conversation
   const handleSummarizeChat = async () => {
     if (messages.length === 0) {
       setError('No conversation to summarize.');
@@ -192,7 +169,6 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
     setError(null);
 
     try {
-      // Format messages for summarization prompt
       const conversationText = messages.map(msg => {
         if (msg.type === 'user') {
           return `User: ${msg.text}`;
@@ -206,9 +182,7 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
 
       const result = await callGeminiApi(payload);
 
-      if (result && result.candidates && result.candidates.length > 0 &&
-        result.candidates[0].content && result.candidates[0].content.parts &&
-        result.candidates[0].content.parts.length > 0) {
+      if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
         const summaryText = result.candidates[0].content.parts[0].text;
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -225,62 +199,31 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
     }
   };
 
-
   return (
-    <div className="flex flex-col h-full font-sans bg-stone-900 text-gray-100"> {/* Changed h-screen to h-full */}
+    <div className="flex flex-col h-full font-sans bg-stone-900 text-gray-100">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-stone-700 to-stone-900 text-white shadow-lg rounded-b-xl">
-        <h1 className="text-2xl font-bold tracking-wide flex items-center">
-          Hello, it's <Shell className="mx-2 text-stone-300" size={28} /> how can I help you?
-        </h1>
-        <div className="flex items-center space-x-2"> {/* Added a div to group buttons */}
-          <button
-            onClick={handleSummarizeChat}
-            className={`flex items-center px-4 py-2 rounded-full text-sm font-semibold transition-colors duration-200 ${
-              isSummarizing
-                ? 'bg-stone-600 text-stone-200 cursor-not-allowed'
-                : 'bg-stone-500 text-white hover:bg-stone-600'
-            }`}
-            disabled={isSummarizing || messages.length === 0}
-            title="Summarize Chat"
-          >
-            {isSummarizing ? (
-              <svg
-                className="animate-spin h-5 w-5 text-white mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            ) : (
-              <Sparkles className="mr-2" size={18} />
-            )}
-            Summarize Chat ✨
-          </button>
-          {onClose && ( // Conditionally render close button if onClose prop is provided
-            <button
-              onClick={onClose}
-              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-stone-700"
-              aria-label="Close chat"
-            >
-              <X size={24} />
-            </button>
-          )}
-        </div>
-      </header>
+<header className="flex items-center justify-between p-4 bg-gradient-to-r from-stone-700 to-stone-900 text-white shadow-lg rounded-b-xl **flex-wrap gap-y-2**">
+  {/* Left side of the header */}
+  <div className="flex items-center **w-full sm:w-auto**">
+    <h3 className="text-xl **sm:text-2xs** font-bold tracking-wide flex items-center">
+      Hello, it's <Shell className="mx-2 text-stone-300" size={28} /> 
+    </h3>
+  </div>
+
+  {/* Right side of the header with buttons */}
+  <div className="flex items-center space-x-2 **ml-auto**">
+
+    {onClose && (
+      <button
+        onClick={onClose}
+        className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-stone-700"
+        aria-label="Close chat"
+      >
+        <X size={24} />
+      </button>
+    )}
+  </div>
+</header>
 
       {/* Chat Messages Display Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
@@ -291,21 +234,21 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
           >
             {msg.type === 'bot' && (
               <div className="flex-shrink-0 mr-3 mt-1">
-                <Shell className="text-stone-400" size={24} /> {/* Darker shell icon for bot avatar */}
+                <Shell className="text-stone-400" size={24} />
               </div>
             )}
             <div
-              className={`max-w-[70%] p-3 rounded-xl shadow-md ${
+              className={`max-w-[70%] p-3 rounded-xl shadow-md **sm:max-w-[60%]** ${
                 msg.type === 'user'
-                  ? 'bg-stone-600 text-white rounded-br-none' // Darker user bubble
-                  : 'bg-stone-800 text-gray-200 rounded-bl-none' // Darker bot bubble
+                  ? 'bg-stone-600 text-white rounded-br-none'
+                  : 'bg-stone-800 text-gray-200 rounded-bl-none'
               }`}
             >
               {msg.image && (
                 <img
                   src={msg.image}
                   alt="Uploaded preview"
-                  className="max-h-24 w-auto rounded-md mb-2 border border-gray-700" // Darker border
+                  className="max-h-24 w-auto rounded-md mb-2 border border-gray-700"
                 />
               )}
               <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -315,9 +258,9 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
         {isLoading && (
           <div className="flex justify-start items-center">
             <div className="flex-shrink-0 mr-3 mt-1">
-              <Shell className="text-stone-400 animate-pulse" size={24} /> {/* Darker shell icon for loading */}
+              <Shell className="text-stone-400 animate-pulse" size={24} />
             </div>
-            <div className="bg-stone-800 p-3 rounded-xl shadow-md rounded-bl-none"> {/* Darker loading bubble */}
+            <div className="bg-stone-800 p-3 rounded-xl shadow-md rounded-bl-none">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
                 <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -327,17 +270,17 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
           </div>
         )}
         {error && (
-          <div className="text-red-400 text-center p-2 bg-red-900 rounded-lg"> {/* Darker error message */}
+          <div className="text-red-400 text-center p-2 bg-red-900 rounded-lg">
             {error}
           </div>
         )}
-        <div ref={messagesEndRef} /> {/* Scroll target */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-stone-800 border-t border-gray-700 shadow-inner rounded-t-xl"> {/* Darker input area */}
+      <div className="p-4 bg-stone-800 border-t border-gray-700 shadow-inner rounded-t-xl">
         {imagePreviewUrl && (
-          <div className="relative mb-3 p-2 border border-gray-600 rounded-lg bg-stone-700"> {/* Darker image preview container */}
+          <div className="relative mb-3 p-2 border border-gray-600 rounded-lg bg-stone-700">
             <img src={imagePreviewUrl} alt="Image Preview" className="max-h-24 w-auto rounded-md mx-auto" />
             <button
               onClick={handleRemoveImage}
@@ -365,7 +308,7 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
           {/* Image Upload Button */}
           <label
             htmlFor="imageUpload"
-            className="flex-shrink-0 p-3 bg-stone-700 text-stone-200 rounded-full cursor-pointer hover:bg-stone-600 transition-colors shadow-sm" // Darker upload button
+            className="flex-shrink-0 p-3 bg-stone-700 text-stone-200 rounded-full cursor-pointer hover:bg-stone-600 transition-colors shadow-sm"
             title="Upload Image"
           >
             <svg
@@ -394,14 +337,14 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
           {/* Resizable Textarea */}
           <textarea
             ref={textareaRef}
-            className="flex-1 resize-none overflow-hidden p-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500 text-gray-100 bg-stone-700 transition-all duration-200 text-base" // Darker textarea
+            className="flex-1 resize-none overflow-hidden p-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500 text-gray-100 bg-stone-700 transition-all duration-200 **text-sm sm:text-base**"
             placeholder="Type your message..."
             rows="1"
             value={inputText}
             onChange={handleInputChange}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Prevent new line
+                e.preventDefault();
                 handleSendMessage();
               }
             }}
@@ -413,7 +356,7 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
             onClick={handleSendMessage}
             className={`flex-shrink-0 p-3 rounded-full shadow-lg transition-all duration-200 ${
               isLoading || isSummarizing || (!inputText.trim() && !selectedImage)
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed' // Darker disabled state
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                 : 'bg-stone-500 text-white hover:bg-stone-600'
             }`}
             disabled={isLoading || isSummarizing || (!inputText.trim() && !selectedImage)}
@@ -465,19 +408,19 @@ function ChatBotApp({ onClose }) { // Changed function name from 'App' to 'ChatB
           width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #374151; /* Darker track */
+          background: #4e6d78ff;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #6b7280; /* Darker thumb */
+          background: #4e4f4fff;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4b5563; /* Darker hover */
+          background: #748baaff;
         }
       `}</style>
     </div>
   );
 }
 
-export default ChatBotApp; // Changed export default from 'App' to 'ChatBotApp'
+export default ChatBotApp;

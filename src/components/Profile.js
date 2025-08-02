@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Edit, 
-  Lock, 
-  Save, 
+import {
+  User,
+  Edit,
+  Lock,
+  Save,
   X,
   Eye,
   EyeOff
 } from 'lucide-react';
 import axios from 'axios';
+import RandomColorLoader from './RandomColorLoader'; // Import the new loader component
+import BoxLoader  from './BoxLoader';
 
 const Profile = () => {
   const [userData, setUserData] = useState({
@@ -51,22 +53,22 @@ const Profile = () => {
       // Get token from localStorage
       const token = localStorage.getItem('token');
       console.log('Token:', token); // Debug log
-      
+
       if (!token) {
         console.log('No token found, redirecting to login');
         window.location.href = '/login';
         return;
       }
-      
+
       const response = await axios.get('http://localhost:4000/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       console.log('API Response:', response.data); // Debug log
-      
+
       // Map the API response to our component state
       if (response.data.status === 'success') {
         const apiData = response.data.data;
@@ -87,7 +89,7 @@ const Profile = () => {
     } catch (error) {
       console.error('Error fetching user data:', error);
       console.error('Error response:', error.response); // Debug log
-      
+
       if (error.response?.status === 401) {
         console.log('401 Unauthorized, redirecting to login');
         // Redirect to login if unauthorized
@@ -135,17 +137,17 @@ const Profile = () => {
   const handleSaveChanges = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get token from localStorage
       const token = localStorage.getItem('token');
       console.log('Save changes - Token:', token); // Debug log
-      
+
       if (!token) {
         console.log('No token found for save changes, redirecting to login');
         window.location.href = '/login';
         return;
       }
-      
+
       // Map our component state back to API format
       const apiData = {
         first_name: userData.firstName,
@@ -157,18 +159,18 @@ const Profile = () => {
         pan_card_no: userData.panCard,
         account_no: userData.accountNumber
       };
-      
+
       console.log('Sending data to API:', apiData); // Debug log
-      
+
       const response = await axios.put('http://localhost:4000/profile', apiData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       console.log('Save response:', response.data); // Debug log
-      
+
       if (response.status === 200) {
         setMessage('Profile updated successfully!');
         setIsEditing(false);
@@ -180,7 +182,7 @@ const Profile = () => {
     } catch (error) {
       console.error('Save changes error:', error); // Debug log
       console.error('Error response:', error.response); // Debug log
-      
+
       if (error.response?.status === 401) {
         console.log('401 Unauthorized for save changes, redirecting to login');
         // Redirect to login if unauthorized
@@ -199,11 +201,11 @@ const Profile = () => {
       return;
     }
 
-    
+
     try {
       // Get token from localStorage
       const token = localStorage.getItem('token');
-      
+
       const response = await axios.put('http://localhost:4000/profile/changePassword', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
@@ -239,10 +241,8 @@ const Profile = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
-        </div>
+        {/* Replaced the old spinner with the new RandomColorLoader */}
+        <BoxLoader />
       </div>
     );
   }
@@ -429,8 +429,8 @@ const Profile = () => {
         {/* Message Display */}
         {message && (
           <div className={`mt-4 p-3 rounded-lg text-sm ${
-            message.includes('successfully') || message.includes('success') 
-              ? 'bg-green-100 text-green-700' 
+            message.includes('successfully') || message.includes('success')
+              ? 'bg-green-100 text-green-700'
               : 'bg-red-100 text-red-700'
           }`}>
             {message}

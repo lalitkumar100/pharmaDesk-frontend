@@ -22,6 +22,15 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'spin-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        }
+      },
+      animation: {
+        'spin-slow': 'spin-slow 2s linear infinite',
+      },
     },
   },
   plugins: [],
