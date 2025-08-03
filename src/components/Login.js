@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import BoxLoader from "./BoxLoader";
+import BoxLoader from "./looader/BoxLoader";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',

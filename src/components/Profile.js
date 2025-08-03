@@ -9,8 +9,8 @@ import {
   EyeOff
 } from 'lucide-react';
 import axios from 'axios';
-import RandomColorLoader from './RandomColorLoader'; // Import the new loader component
-import BoxLoader  from './BoxLoader';
+import RandomColorLoader from './looader/RandomColorLoader'; // Import the new loader component
+import BoxLoader  from './looader/BoxLoader';
 
 const Profile = () => {
   const [userData, setUserData] = useState({

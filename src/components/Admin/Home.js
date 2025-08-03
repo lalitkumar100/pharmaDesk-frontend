@@ -13,20 +13,20 @@ import {
   Shell,
 } from 'lucide-react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-import BoxLoader from "./BoxLoader"; // Imported but not used in this snippet, assuming it's for future use.
+import BoxLoader from "./looader/BoxLoader"; // Imported but not used in this snippet, assuming it's for future use.
 // Import all the components that will be rendered inside Home
-import Reports from './Reports';
+import Reports from './reportFeature/Reports';
 import AddStock from './AddStock';
 import StockManagement from './StockManagement';
-import EmployeeForm from './EmployeeForm';
-import StaffDirectory from './StaffDirectory';
-import Billing from './Billing';
+import EmployeeForm from './StaffFeature/EmployeeForm';
+import StaffDirectory from './StaffFeature/StaffDirectory';
+import Billing from '../Billing';
 import Dashboard from './Dashboard'; // Assuming this is the Dashboard component you want to render
-import Wholesaler from './wholesaler';
-import Invoice from './inovice';
+import Wholesaler from './reportFeature/wholesaler';
+import Invoice from './reportFeature/inovice';
 // Import the Chatbot App component
-import ChatbotApp from './ChatbotApp'; // Assuming your chatbot component is in App.js
-import Expiry from './';
+import ChatbotApp from '../ChatbotApp'; // Assuming your chatbot component is in App.js
+import Expiry from './reportFeature/expiry';
 
 // Define menu items with their names, icons, and paths
 const menuItems = [

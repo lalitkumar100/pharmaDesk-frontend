@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, FileText, Calendar, BarChart3, ChevronRight } from 'lucide-react';
-import BoxLoader from "./BoxLoader";
+import BoxLoader from "../looader/BoxLoader";
 
 // Add a 'route' property to each report card object
 const reportCards = [

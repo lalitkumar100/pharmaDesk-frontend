@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shell, Sparkles, X } from 'lucide-react';
-import RandomColorLoader from './RandomColorLoader'; // Import the new component
+import RandomColorLoader from './Admin/looader/RandomColorLoader'; // Import the new component
 
 function ChatBotApp({ onClose }) {
   const [messages, setMessages] = useState([]);
