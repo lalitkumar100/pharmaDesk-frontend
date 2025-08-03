@@ -1,538 +1,267 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { ArrowLeft, Search, ChevronDown, Eye, X, Edit, Save, Trash2, RotateCcw } from 'lucide-react';
-const API_BASE_URL = 'http://localhost:4000';
-import BoxLoader from "./BoxLoader";
-const StockManagement = () => {
-  const [medicines, setMedicines] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searchField, setSearchField] = useState('medicine');
-  const [searchValue, setSearchValue] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [sortBy, setSortBy] = useState('A-Z');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [itemsPerPage] = useState(10);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedMedicine, setSelectedMedicine] = useState(null);
-  const [modalMode, setModalMode] = useState('view');
-  const [modalData, setModalData] = useState({});
-  const [modalLoading, setModalLoading] = useState(false);
+import React, { useState } from 'react';
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Menu, X, Filter } from 'lucide-react';
 
-  const searchInputRef = useRef(null);
+// Helper function to sort data
+const sortData = (data, sortOption) => {
+  switch (sortOption) {
+    case 'A-Z':
+      return [...data].sort((a, b) => a.name.localeCompare(b.name));
+    case 'Z-A':
+      return [...data].sort((a, b) => b.name.localeCompare(a.name));
+    case 'Price High to Low':
+      return [...data].sort((a, b) => b.price - a.price);
+    case 'Price Low to High':
+      return [...data].sort((a, b) => a.price - b.price);
+    case 'Quantity High to Low':
+      return [...data].sort((a, b) => b.quantity - a.quantity);
+    case 'Quantity Low to High':
+      return [...data].sort((a, b) => a.quantity - b.quantity);
+    default:
+      return data;
+  }
+};
 
-  const searchFields = [
-    { value: 'medicine', label: 'Medicine' },
-    { value: 'brand', label: 'Brand' },
-    { value: 'wholesaler', label: 'Wholesaler' },
-    { value: 'invoiceNo', label: 'Invoice No' },
-    { value: 'batchNo', label: 'Batch No' }
-  ];
+const mockData = [
+  {
+    id: 1,
+    sno: 1,
+    name: 'Alprazolam 0.5mg',
+    brand: 'Xanax',
+    batch: 'ALP026',
+    quantity: 50,
+    expiry: '08/12/2025',
+    price: 55.00,
+    mrp: 55.00,
+    purchasePrice: 48.00,
+    invoiceNo: 'INV-001',
+    wholesaler: 'MedSupply Co. Ltd.',
+    mfgDate: '08/01/2024',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '50 units available',
+    packedType: 'Strip of 10 tablets',
+  },
+  {
+    id: 2,
+    sno: 2,
+    name: 'Amlodipine 5mg',
+    brand: 'Norvasc',
+    batch: 'AML009',
+    quantity: 95,
+    expiry: '08/02/2026',
+    price: 38.00,
+    mrp: 40.00,
+    purchasePrice: 32.00,
+    invoiceNo: 'INV-002',
+    wholesaler: 'PharmaDistributors Inc.',
+    mfgDate: '07/15/2024',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '95 units available',
+    packedType: 'Strip of 14 tablets',
+  },
+  {
+    id: 3,
+    sno: 3,
+    name: 'Amoxicillin 250mg',
+    brand: 'Amoxil',
+    batch: 'AMX002',
+    quantity: 75,
+    expiry: '08/15/2025',
+    price: 45.00,
+    mrp: 45.00,
+    purchasePrice: 36.00,
+    invoiceNo: 'INV-003',
+    wholesaler: 'MedSupply Co. Ltd.',
+    mfgDate: '08/01/2024',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '75 units available',
+    packedType: 'Strip of 10 tablets',
+  },
+  {
+    id: 4,
+    sno: 4,
+    name: 'Aspirin 75mg',
+    brand: 'Disprin',
+    batch: 'ASP011',
+    quantity: 250,
+    expiry: '04/15/2026',
+    price: 15.75,
+    mrp: 16.00,
+    purchasePrice: 12.50,
+    invoiceNo: 'INV-004',
+    wholesaler: 'PharmaDistributors Inc.',
+    mfgDate: '03/01/2025',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '250 units available',
+    packedType: 'Bottle of 100 tablets',
+  },
+  {
+    id: 5,
+    sno: 5,
+    name: 'Atorvastatin 10mg',
+    brand: 'Lipitor',
+    batch: 'ATO007',
+    quantity: 65,
+    expiry: '07/18/2025',
+    price: 65.25,
+    mrp: 68.00,
+    purchasePrice: 58.00,
+    invoiceNo: 'INV-005',
+    wholesaler: 'MedSupply Co. Ltd.',
+    mfgDate: '06/20/2024',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '65 units available',
+    packedType: 'Strip of 10 tablets',
+  },
+  {
+    id: 6,
+    sno: 6,
+    name: 'Cetirizine 10mg',
+    brand: 'Zyrtec',
+    batch: 'CET001',
+    quantity: 150,
+    expiry: '01/20/2026',
+    price: 18.25,
+    mrp: 19.00,
+    purchasePrice: 15.00,
+    invoiceNo: 'INV-006',
+    wholesaler: 'PharmaDistributors Inc.',
+    mfgDate: '12/01/2024',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '150 units available',
+    packedType: 'Strip of 10 tablets',
+  },
+  {
+    id: 7,
+    sno: 7,
+    name: 'Ciprofloxacin 500mg',
+    brand: 'Cipro',
+    batch: 'CIP001',
+    quantity: 120,
+    expiry: '02/25/2026',
+    price: 58.50,
+    mrp: 60.00,
+    purchasePrice: 50.00,
+    invoiceNo: 'INV-007',
+    wholesaler: 'MedSupply Co. Ltd.',
+    mfgDate: '01/10/2025',
+    createdDate: '08/02/2025 9:33:19 PM',
+    currentStock: '120 units available',
+    packedType: 'Strip of 10 tablets',
+  },
+];
 
-  const sortOptions = [
-    { value: 'A-Z', label: 'A-Z' },
-    { value: 'Z-A', label: 'Z-A' },
-    { value: 'price-low-high', label: 'Price Low to High' },
-    { value: 'price-high-low', label: 'Price High to Low' },
-    { value: 'quantity-high-low', label: 'Quantity High to Low' },
-    { value: 'quantity-low-high', label: 'Quantity Low to High' }
-  ];
-
-  const getPlaceholderText = () => {
-    const field = searchFields.find(f => f.value === searchField);
-    return `Search by ${field?.label || 'Medicine'}...`;
-  };
-
-  const fetchSuggestions = async (field, value) => {
-    if (!value.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-
-    try {
-      let endpoint = '';
-      switch (field) {
-        case 'medicine':
-          endpoint = `${API_BASE_URL}/admin/medicines/recommendation2?medicine=${encodeURIComponent(value)}`;
-          break;
-        case 'wholesaler':
-          endpoint = `${API_BASE_URL}/admin/wholesaler/recommendation?wholesaler=${encodeURIComponent(value)}`;
-          break;
-        case 'brand':
-          endpoint = `${API_BASE_URL}/admin/brand/recommendation?brand=${encodeURIComponent(value)}`;
-          break;
-        default:
-          return;
-      }
-
-      const response = await axios.get(endpoint);
-      if (response.data.status === 'success') {
-        setSuggestions(response.data.recommendations || []);
-        setShowSuggestions(true);
-        setSelectedSuggestionIndex(-1);
-      }
-    } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      setSuggestions([]);
-    }
-  };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (['medicine', 'brand', 'wholesaler'].includes(searchField)) {
-        fetchSuggestions(searchField, searchValue);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchValue, searchField]);
-
-  const fetchMedicines = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await axios.get(`${API_BASE_URL}/admin/MedicineSerach?${searchField}=${encodeURIComponent(searchValue)}`);
-      
-      if (response.data.status === 'success') {
-        setMedicines(response.data.data.medicines || []);
-        setTotalItems(response.data.data.total_items || 0);
-      } else {
-        setError('Failed to fetch medicines');
-      }
-    } catch (error) {
-      console.error('Error fetching medicines:', error);
-      setError('Failed to fetch medicines. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = () => {
-    setCurrentPage(1);
-    fetchMedicines();
-    setShowSuggestions(false);
-  };
-
-  const handleSuggestionSelect = (suggestion) => {
-    setSearchValue(suggestion);
-    setShowSuggestions(false);
-    handleSearch();
-  };
-
-  const handleKeyDown = (e) => {
-    if (!showSuggestions) return;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedSuggestionIndex(prev => prev > 0 ? prev - 1 : -1);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
-          handleSuggestionSelect(suggestions[selectedSuggestionIndex]);
-        } else {
-          handleSearch();
-        }
-        break;
-      case 'Escape':
-        setShowSuggestions(false);
-        break;
-    }
-  };
-
-  const getSortedMedicines = () => {
-    const sorted = [...medicines];
-    
-    switch (sortBy) {
-      case 'A-Z':
-        return sorted.sort((a, b) => a.medicineName?.localeCompare(b.medicineName));
-      case 'Z-A':
-        return sorted.sort((a, b) => b.medicineName?.localeCompare(a.medicineName));
-      case 'price-low-high':
-        return sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-      case 'price-high-low':
-        return sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-      case 'quantity-high-low':
-        return sorted.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
-      case 'quantity-low-high':
-        return sorted.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
-      default:
-        return sorted;
-    }
-  };
-
-  const getPaginatedMedicines = () => {
-    const sorted = getSortedMedicines();
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(startIndex, startIndex + itemsPerPage);
-  };
-
-  const getQuantityColor = (quantity) => {
-    if (quantity > 200) return 'bg-green-100 text-green-800';
-    if (quantity > 50) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
-  };
-
-  const fetchMedicineDetails = async (medicineId) => {
-    setModalLoading(true);
-    try {
-      const response = await axios.get(`${API_BASE_URL}/admin/medicne_info/${medicineId}`);
-      if (response.data.status === 'success') {
-        setModalData(response.data.data || {});
-      }
-    } catch (error) {
-      console.error('Error fetching medicine details:', error);
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  const handleViewMedicine = (medicine) => {
-    setSelectedMedicine(medicine);
-    setModalMode('view');
-    setShowModal(true);
-    fetchMedicineDetails(medicine.medicine_id);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedMedicine(null);
-    setModalData({});
-    setModalMode('view');
-  };
-
-  const handleUpdateToggle = () => {
-    setModalMode(modalMode === 'view' ? 'edit' : 'view');
-  };
-
-  const handleSaveMedicine = async () => {
-    try {
-      await axios.put(`${API_BASE_URL}/admin/medicne_Stock/${selectedMedicine.medicine_id}`, modalData);
-      handleCloseModal();
-      fetchMedicines();
-    } catch (error) {
-      console.error('Error updating medicine:', error);
-    }
-  };
-
-  const handlePurchaseReturn = async () => {
-    try {
-      await axios.get(`${API_BASE_URL}/admin/medicne_return/${selectedMedicine.medicine_id}`);
-      handleCloseModal();
-      fetchMedicines();
-    } catch (error) {
-      console.error('Error processing purchase return:', error);
-    }
-  };
-
-  const handleDeleteMedicine = async () => {
-    if (window.confirm('Are you sure you want to delete this medicine?')) {
-      try {
-        await axios.delete(`${API_BASE_URL}/admin/medicne_stock/${selectedMedicine.medicine_id}`);
-        handleCloseModal();
-        fetchMedicines();
-      } catch (error) {
-        console.error('Error deleting medicine:', error);
-      }
-    }
-  };
-
-  const handleModalDataChange = (field, value) => {
-    setModalData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+const Modal = ({ isOpen, onClose, medicine }) => {
+  if (!isOpen) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-  
-
-      {/* Sticky Control Section */}
-      <div className="sticky top-16 z-40 bg-white shadow-sm border-b border-gray-200">
-        <div className="px-4 py-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 flex flex-col lg:flex-row gap-3">
-              <div className="relative">
-                <select
-                  value={searchField}
-                  onChange={(e) => setSearchField(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {searchFields.map(field => (
-                    <option key={field.value} value={field.value}>
-                      {field.label}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              <div className="flex-1 relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={getPlaceholderText()}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                        className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
-                          index === selectedSuggestionIndex ? 'bg-blue-50 text-blue-700' : ''
-                        }`}
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {sortOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
+        <div className="flex items-center justify-between border-b pb-4">
+          <h2 className="text-xl font-bold">Medicine Details</h2>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
+            <X size={20} className="text-gray-600" />
+          </button>
+        </div>
+        <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
+          <div>
+            <p className="font-semibold">Medicine Name</p>
+            <p className="font-normal">{medicine.name}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Brand</p>
+            <p className="font-normal">{medicine.brand}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Batch No</p>
+            <p className="font-normal">{medicine.batch}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Quantity</p>
+            <p className="font-normal">{medicine.quantity} units</p>
+          </div>
+          <div>
+            <p className="font-semibold">MRP</p>
+            <p className="font-normal">₹{medicine.mrp.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Purchase Price</p>
+            <p className="font-normal">₹{medicine.purchasePrice.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Invoice No</p>
+            <p className="font-normal">{medicine.invoiceNo}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Expiry Date</p>
+            <p className="font-normal">{medicine.expiry}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Wholesaler</p>
+            <p className="font-normal">{medicine.wholesaler}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Packed Type</p>
+            <p className="font-normal">{medicine.packedType}</p>
+          </div>
+          <div>
+            <p className="font-semibold">MFG Date</p>
+            <p className="font-normal">{medicine.mfgDate}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Created At</p>
+            <p className="font-normal">{medicine.createdDate}</p>
+          </div>
+          <div className="col-span-2">
+            <p className="font-semibold">Current Stock</p>
+            <p className="font-normal">{medicine.currentStock}</p>
           </div>
         </div>
+        <div className="mt-6 flex justify-end space-x-2">
+          <button className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 transition-colors hover:bg-gray-50">
+            Purchase Return
+          </button>
+          <button className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
+            Update
+          </button>
+        </div>
       </div>
+    </div>
+  );
+};
 
-      {/* Main Content */}
-      <div className="px-4 py-6">
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
-        )}
+// Custom Dropdown component to replace shadcn
+const SortDropdown = ({ sortOption, setSortOption }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const options = ['A-Z', 'Z-A', 'Price Low to High', 'Price High to Low', 'Quantity Low to High', 'Quantity High to Low'];
 
-        {loading && (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
+  const handleSelect = (option) => {
+    setSortOption(option);
+    setIsOpen(false);
+  };
 
-        {!loading && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-800 text-white sticky top-0">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium">S.No</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Medicine</th>
-                    <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-medium">Brand</th>
-                    <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-medium">Batch</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Quantity</th>
-                    <th className="hidden lg:table-cell px-4 py-3 text-left text-sm font-medium">Expiry</th>
-                    <th className="hidden md:table-cell px-4 py-3 text-left text-sm font-medium">Price</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {getPaginatedMedicines().map((medicine, index) => (
-                    <tr key={medicine.medicine_id || index} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {(currentPage - 1) * itemsPerPage + index + 1}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                        {medicine.medicineName}
-                      </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-sm text-gray-600">
-                        {medicine.brand}
-                      </td>
-                      <td className="hidden lg:table-cell px-4 py-3 text-sm text-gray-600">
-                        {medicine.batchNo}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getQuantityColor(medicine.quantity)}`}>
-                          {medicine.quantity}
-                        </span>
-                      </td>
-                      <td className="hidden lg:table-cell px-4 py-3 text-sm text-gray-600">
-                        {medicine.expiryDate}
-                      </td>
-                      <td className="hidden md:table-cell px-4 py-3 text-sm text-gray-600">
-                        ₹{medicine.price}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleViewMedicine(medicine)}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {getPaginatedMedicines().length === 0 && !loading && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-sm">No medicines found</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!loading && totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+      >
+        <span className="hidden md:inline">{sortOption}</span>
+        <ChevronDown className="h-4 w-4" />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="py-1">
+            <div className="px-4 py-2 text-xs font-semibold text-gray-900">Sort by</div>
+            <hr className="my-1 border-gray-100" />
+            {options.map((option) => (
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                key={option}
+                onClick={() => handleSelect(option)}
+                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               >
-                Prev
+                {option}
               </button>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-            <div className="text-sm text-gray-700">
-              Page {currentPage} of {totalPages} ({totalItems} total items)
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Medicine Details Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" onClick={handleCloseModal}>
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {modalMode === 'view' ? 'Medicine Details' : 'Edit Medicine'}
-                  </h3>
-                  <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="px-6 py-4">
-                {modalLoading ? (
-                  <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { field: 'id', label: 'ID', disabled: true },
-                      { field: 'medicineName', label: 'Medicine Name' },
-                      { field: 'brand', label: 'Brand' },
-                      { field: 'batchNo', label: 'Batch No' },
-                      { field: 'quantity', label: 'Quantity', type: 'number' },
-                      { field: 'expiryDate', label: 'Expiry Date', type: 'date' },
-                      { field: 'price', label: 'Price', type: 'number' },
-                      { field: 'mrp', label: 'MRP', type: 'number' },
-                      { field: 'purchasePrice', label: 'Purchase Price', type: 'number' },
-                      { field: 'invoiceNo', label: 'Invoice No' },
-                      { field: 'wholesaler', label: 'Wholesaler' },
-                      { field: 'packedType', label: 'Packed Type', fullWidth: true }
-                    ].map(({ field, label, type = 'text', disabled = false, fullWidth = false }) => (
-                      <div key={field} className={fullWidth ? 'md:col-span-2' : ''}>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-                        <input
-                          type={type}
-                          value={modalData[field] || ''}
-                          onChange={(e) => handleModalDataChange(field, e.target.value)}
-                          disabled={modalMode === 'view' || disabled}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-                {modalMode === 'view' ? (
-                  <>
-                    <button
-                      onClick={handlePurchaseReturn}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                    >
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Purchase Return
-                    </button>
-                    <button
-                      onClick={handleDeleteMedicine}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </button>
-                    <button
-                      onClick={handleUpdateToggle}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Update
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={handleUpdateToggle}
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSaveMedicine}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       )}
@@ -540,4 +269,214 @@ const StockManagement = () => {
   );
 };
 
-export default StockManagement; 
+
+// Main App component
+export default function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('A-Z');
+  const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filter and sort the data based on state
+  const filteredData = mockData.filter(medicine =>
+    medicine.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const sortedData = sortData(filteredData, sortOption);
+  const itemsPerPage = 4;
+  const totalItems = sortedData.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleViewDetails = (medicine) => {
+    setSelectedMedicine(medicine);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 antialiased">
+      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        {/* Header Section */}
+        <header className="flex items-center space-x-2 rounded-xl bg-white p-4 shadow-sm md:p-6">
+        
+          <div className="ml-auto flex flex-grow items-center justify-end space-x-4">
+            {/* Filter and Search Section */}
+            <div className="relative flex-grow max-w-sm">
+              <input
+                type="text"
+                placeholder="Search by medicine..."
+                className="w-full rounded-full border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400" size={18} />
+            </div>
+            {/* View Mode Toggle Button */}
+            <button
+              onClick={() => setViewMode(viewMode === 'card' ? 'table' : 'card')}
+              className="rounded-full bg-gray-100 p-2 text-gray-500 transition-colors hover:bg-gray-200"
+              title={viewMode === 'card' ? 'Switch to Table View' : 'Switch to Card View'}
+            >
+              <Filter className="h-5 w-5" />
+            </button>
+            {/* Custom Sort Dropdown Component */}
+            <SortDropdown sortOption={sortOption} setSortOption={setSortOption} />
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="mt-8">
+          <h2 className="mb-4 text-center text-2xl font-bold text-blue-600">Medicine List</h2>
+
+          {/* Conditional Rendering based on viewMode */}
+          {viewMode === 'table' ? (
+            // Table View
+            <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">S.No</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Medicine</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Brand</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Batch</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Quantity</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Expiry</th>
+                    <th scope="col" className="px-4 py-3 text-left font-medium">Price</th>
+                    <th scope="col" className="px-4 py-3 text-center font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {paginatedData.length > 0 ? (
+                    paginatedData.map((medicine, index) => (
+                      <tr key={medicine.id} className="text-sm">
+                        <td className="whitespace-nowrap px-4 py-4 font-medium text-gray-900">{startIndex + index + 1}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-gray-700">{medicine.name}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-gray-700">{medicine.brand}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-gray-700">{medicine.batch}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-center">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${medicine.quantity < 100 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                            {medicine.quantity}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-4 text-gray-700">{medicine.expiry}</td>
+                        <td className="whitespace-nowrap px-4 py-4 font-semibold text-gray-900">₹{medicine.price.toFixed(2)}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-center">
+                          <button
+                            onClick={() => handleViewDetails(medicine)}
+                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="px-4 py-4 text-center text-gray-500">No medicines found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            // Card View
+            <div className="space-y-4">
+              {paginatedData.length > 0 ? (
+                paginatedData.map((medicine) => (
+                  <div key={medicine.id} className="flex items-center rounded-xl bg-white p-4 shadow-sm">
+                    <div className="flex-grow">
+                      <h3 className="text-lg font-semibold text-gray-900">{medicine.name}</h3>
+                      <p className="text-sm text-gray-500">{medicine.brand}</p>
+                      <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+                        <p>
+                          <span className="font-medium">Batch:</span> {medicine.batch}
+                        </p>
+                        <p>
+                          <span className="font-medium">Quantity:</span>{' '}
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${medicine.quantity < 100 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                            {medicine.quantity}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="ml-auto text-right">
+                      <p className="text-lg font-bold text-gray-900">₹{medicine.price.toFixed(2)}</p>
+                      <p className="text-sm text-gray-500">
+                        Expiry: {medicine.expiry}
+                      </p>
+                      <button
+                        onClick={() => handleViewDetails(medicine)}
+                        className="mt-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                      >
+                        View
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500">No medicines found.</p>
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* Pagination */}
+        <div className="mt-8 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-4 sm:px-6">
+          <div className="flex flex-1 justify-between sm:hidden">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" /> Prev
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next <ChevronRight className="h-4 w-4 ml-2" />
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span> ({totalItems} total items)
+              </p>
+            </div>
+            <div>
+              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                >
+                  <span className="sr-only">Previous</span>
+                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                >
+                  <span className="sr-only">Next</span>
+                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} medicine={selectedMedicine} />
+    </div>
+  );
+}

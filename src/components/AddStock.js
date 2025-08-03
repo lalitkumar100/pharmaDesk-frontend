@@ -1,12 +1,16 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { Shell } from "lucide-react"; // Importing the Bot icon for the AI button
-import env from '../../'
+import RandomColorLoader from "./RandomColorLoader";
 // Placeholder for BoxLoader
 const BoxLoader = () => (
-  <div className="flex items-center justify-center py-4">
-    <div className="w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full animate-spin border-blue-500"></div>
-  </div>
+
+  <RandomColorLoader
+    className="animate-spin-slow w-full h-full mb-4"
+    // ... other props
+  />
+
+
 );
 
 // Placeholder for AddMedicineModal
@@ -271,7 +275,7 @@ const ImageUploadModal = ({ onClose, onUploadSuccess }) => {
         }
       };
 
-      const apiKey = ""; // Leave as-is, Canvas will provide it at runtime
+      const apiKey = 'AIzaSyDZrqy9EZ-9ZONYihdU6HxUCcORXdVHORI' // Leave as-is, Canvas will provide it at runtime
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
       const response = await fetchWithExponentialBackoff(apiUrl, {
@@ -345,12 +349,12 @@ const ImageUploadModal = ({ onClose, onUploadSuccess }) => {
           <button
             type="button"
             onClick={handleUpload}
-            className="flex items-center justify-center px-4 py-2 font-medium text-white transition-colors bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center justify-center px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={loading || !selectedFile}
           >
             {loading ? (
               <>
-                <BoxLoader /> Uploading...
+                <BoxLoader />
               </>
             ) : (
               "Upload and Process"
