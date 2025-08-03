@@ -4,7 +4,7 @@ import { ShoppingCart, Package, Wallet, AlertTriangle, DollarSign, ArrowUp } fro
 // Main Dashboard component
 const Dashboard = () => { // Renamed App to Dashboard
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8 font-sans flex items-center justify-center">
+    <div className="min-h-screen bg-theme-70 p-4 sm:p-6 lg:p-8 font-sans flex items-center justify-center">
       <div className="w-full max-w-6xl">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8 text-center">
           Dashboard

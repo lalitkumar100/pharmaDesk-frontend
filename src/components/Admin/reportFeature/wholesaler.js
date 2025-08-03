@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, ArrowLeft, X, ChevronLeft, ChevronRight, Trash2, Plus, FileSpreadsheet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import BoxLoader from '../looader/BoxLoader';
+import BoxLoader from '../../looader/BoxLoader';
 
 // --- MOCK DATA ---
 const initialWholesalers = [

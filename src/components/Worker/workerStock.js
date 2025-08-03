@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
-import BoxLoader from './Admin/looader/BoxLoader';
+import BoxLoader from '../looader/BoxLoader';
 import { FileDown } from 'lucide-react';
 
 // --- API Configuration ---

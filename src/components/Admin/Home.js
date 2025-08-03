@@ -13,17 +13,17 @@ import {
   Shell,
 } from 'lucide-react';
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
-import BoxLoader from "./looader/BoxLoader"; // Imported but not used in this snippet, assuming it's for future use.
+import BoxLoader from "../looader/BoxLoader"; // Imported but not used in this snippet, assuming it's for future use.
 // Import all the components that will be rendered inside Home
 import Reports from './reportFeature/Reports';
-import AddStock from './AddStock';
+import AddStock from './StockEntry/AddStock';
 import StockManagement from './StockManagement';
 import EmployeeForm from './StaffFeature/EmployeeForm';
 import StaffDirectory from './StaffFeature/StaffDirectory';
 import Billing from '../Billing';
 import Dashboard from './Dashboard'; // Assuming this is the Dashboard component you want to render
 import Wholesaler from './reportFeature/wholesaler';
-import Invoice from './reportFeature/inovice';
+import Invoice from './reportFeature/invoice';
 // Import the Chatbot App component
 import ChatbotApp from '../ChatbotApp'; // Assuming your chatbot component is in App.js
 import Expiry from './reportFeature/expiry';

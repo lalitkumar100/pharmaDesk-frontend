@@ -1,16 +1,16 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Login from '../../Login';
-import Home from '../../Home';
-import Profile from '../../Profile';
-import ForgotPassword from '../../ForgotPassword';
-import BoxLoader from '../looader/BoxLoader';
-import Billing from '../../Billing';
-import RandomColorLoader from '../looader/RandomColorLoader';
-import Invoice from '../inovice';
-import Wholesaler from './components/wholesaler';
-import AccessDenied from './components';
-import Worker from '../../Worker';
+import Login from './components/Login';
+import Home from './components/Admin/Home';
+import Profile from './components/Profile';
+import ForgotPassword from './components/ForgotPassword';
+import BoxLoader from './components/looader/BoxLoader';
+import Billing from './components/Billing';
+import RandomColorLoader from './components/looader/RandomColorLoader';
+import Invoice from './components/Admin/reportFeature/invoice';
+import Wholesaler from './components/Admin/reportFeature/wholesaler';
+import AccessDenied from './components/AccessDenial';
+import Worker from './components/Worker/Home';
 // We'll move the imports for AddStock and StockManagement into the Home component
 
 function App() {

@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import BoxLoader from "../looader/BoxLoader";
+import BoxLoader from "../../looader/BoxLoader";
 
 const StaffDirectory = () => {
   const navigate = useNavigate();
@@ -142,7 +142,7 @@ const StaffDirectory = () => {
   });
 
   return (
-    <div className="min-h-full bg-theme-50 p-4 sm:p-6 font-sans">
+    <div className="min-h-full bg-theme-70 p-4 sm:p-6 font-sans">
       {/* Loading overlay for all API calls */}
       {(loading || isLoading || isExporting) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/30">
@@ -151,7 +151,7 @@ const StaffDirectory = () => {
       )}
 
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-6 sm:p-8 mb-6 sm:mb-8">
+      <div className="bg-theme-200 rounded-xl p-6 sm:p-8 mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Staff Directory</h1>
         <p className="text-gray-600 text-base sm:text-lg">
           View and manage your pharmacy staff members

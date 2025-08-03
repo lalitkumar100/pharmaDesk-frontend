@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Filter, X, ArrowLeft, FileSpreadsheet } from 'lucide-react';
-import BoxLoader from './BoxLoader';
+import BoxLoader from '../../looader/BoxLoader';
 
 // --- API Configuration ---
 const BASE_URL = 'http://localhost:4000';

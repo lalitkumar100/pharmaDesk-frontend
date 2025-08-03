@@ -10,9 +10,9 @@ import {
 import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 
 // Import all the components that will be rendered inside Worker
-import StockManagement from '../workerStock';
+import StockManagement from './workerStock';
 import Billing from '../Billing';
-import Expiry from './expiry';
+
 import ChatbotApp from '../ChatbotApp'; // Import the Chatbot App component
 
 /**
@@ -42,7 +42,7 @@ const Worker = () => {
     // Handler for the "Expiry" button
     const handleExpiryClick = () => {
         // Navigate to the expiry page
-        navigate('/worker/expiry');
+        // navigate('/worker/expiry');
     };
 
     // Handler for the "New Sales" button
@@ -145,7 +145,7 @@ const Worker = () => {
                         </div>
                     } />
                     <Route path="stock" element={<StockManagement />} />
-                    <Route path="expiry" element={<Expiry />} />
+                    {/* <Route path="expiry" element={<Expiry />} /> */}
                     <Route path="billing" element={<Billing />} />
                 </Routes>
             </main>

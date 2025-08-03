@@ -7,16 +7,16 @@ module.exports = {
     extend: {
       colors: {
         'theme': {
-    50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+ 50: '#F0FDFA',
+    100: '#CCFBF6',
+    200: '#99F6E4',
+    300: '#5EEAD4',
+    400: '#2DD4BF',
+    500: '#14B8A6',
+    600: '#0D9488',
+    700: '#0F766E',
+    800: '#115E59',
+    900: '#134E4A',
         }, // ✅ Don't forget this comma if you add more config items
       },
       fontFamily: {

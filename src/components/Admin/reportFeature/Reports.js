@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, FileText, Calendar, BarChart3, ChevronRight } from 'lucide-react';
-import BoxLoader from "../looader/BoxLoader";
+import BoxLoader from "../../looader/BoxLoader";
 
 // Add a 'route' property to each report card object
 const reportCards = [
@@ -53,9 +53,9 @@ const Reports = () => {
   };
 
   return (
-    <div className="min-h-full bg-gray-100 p-8">
+    <div className="min-h-full bg-theme-70 p-8">
       {/* Overview Section */}
-      <div className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-xl p-8 mb-8">
+      <div className="bg-theme-200 rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Reports Dashboard</h1>
         <p className="text-gray-600 text-lg mb-6">
           Access various reports to gain insights into your pharmacy operations

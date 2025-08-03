@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import BoxLoader from "./Admin/looader/BoxLoader";
+import BoxLoader from "./looader/BoxLoader";
 // NOTE: You must replace these placeholders with your actual API URL and token.
 const BaseUrl = 'https://your-api-domain.com'; // Replace with your API base URL
 const bearerToken = 'your_super_secret_token'; // Replace with your actual bearer token

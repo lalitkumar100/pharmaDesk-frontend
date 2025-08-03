@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 import { Shell } from "lucide-react"; // Importing the Bot icon for the AI button
-import RandomColorLoader from "./RandomColorLoader";
+import RandomColorLoader from "../../looader/RandomColorLoader";
 import AddMedicineModal from './AddMedicineModal'
 // Placeholder for BoxLoader
 const BoxLoader = () => (
@@ -340,7 +340,7 @@ function StockEntry() {
   };
 
   return (
-    <div className="flex flex-col w-full font-sans bg-gray-100 flex-1">
+    <div className="flex flex-col w-full font-sans bg-theme-70 flex-1">
       {/* New AI-powered button, placed above the form */}
       <div className="w-full max-w-5xl px-4 mx-auto mt-6 sm:px-6">
         <button
