@@ -22,9 +22,11 @@ import EmployeeForm from './EmployeeForm';
 import StaffDirectory from './StaffDirectory';
 import Billing from './Billing';
 import Dashboard from './Dashboard'; // Assuming this is the Dashboard component you want to render
-
+import Wholesaler from './wholesaler';
+import Invoice from './inovice';
 // Import the Chatbot App component
 import ChatbotApp from './ChatbotApp'; // Assuming your chatbot component is in App.js
+import Expiry from './';
 
 // Define menu items with their names, icons, and paths
 const menuItems = [
@@ -184,21 +186,26 @@ const Home = () => {
         </header>
 
         {/* Page Content Area - This is where your routed components render */}
-        <main className="flex-1 p-4 sm:p-6 overflow-y-auto relative">
-          <Routes>
-            {/* Default route for /home, renders the Dashboard */}
-            <Route index element={<Dashboard />} /> {/* This makes /home render Dashboard */}
-            <Route path="staff" element={<StaffDirectory />} />
-            <Route path="staff/add" element={<EmployeeForm mode="add" />} />
-            <Route path="staff/update/:id" element={<EmployeeForm mode="update" />} />
-            <Route path="addStock" element={<AddStock />} />
-            <Route path="stock" element={<StockManagement />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="billing" element={<Billing />} />
-            {/* The Dashboard route is now handled by the index route for /home */}
-            {/* If you specifically want /home/dashboard to work, you can add: */}
-            {/* <Route path="dashboard" element={<Dashboard />} /> */}
-          </Routes>
+        <main className="flex-1 p-2 sm:p-6 overflow-y-auto relative">
+          <div style={{ maxHeight: '100vh', overflowY: 'auto' }}>
+  <Routes>
+    {/* Default route for /home, renders the Dashboard */}
+    <Route index element={<Dashboard />} /> {/* This makes /home render Dashboard */}
+    <Route path="staff" element={<StaffDirectory />} />
+    <Route path="staff/add" element={<EmployeeForm mode="add" />} />
+    <Route path="staff/update/:id" element={<EmployeeForm mode="update" />} />
+    <Route path="addStock" element={<AddStock />} />
+    <Route path="stock" element={<StockManagement />} />
+    <Route path="reports" element={<Reports />} />
+    <Route path="billing" element={<Billing />} />
+    <Route path="reports/invoice" element={<Invoice />} />
+    <Route path="reports/wholesaler" element={<Wholesaler />} />
+     <Route path="reports/expiry" element={<Expiry />} />
+    {/* The Dashboard route is now handled by the index route for /home */}
+    {/* If you specifically want /home/dashboard to work, you can add: */}
+    {/* <Route path="dashboard" element={<Dashboard />} /> */}
+  </Routes>
+</div>
         </main>
       </div>
 

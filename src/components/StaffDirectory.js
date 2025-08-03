@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Search, ChevronDown, UserCircle, Mail, Phone, Calendar, DollarSign, CreditCard, MapPin, X, Plus
+  Search, ChevronDown, UserCircle, Mail, Phone, Calendar, DollarSign, CreditCard, MapPin, X, Plus, FileDown
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BoxLoader from "./BoxLoader";
+
 const StaffDirectory = () => {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState([]);
@@ -16,6 +17,8 @@ const StaffDirectory = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  // New state to manage the loading for the export button
+  const [isExporting, setIsExporting] = useState(false); 
 
   const token = localStorage.getItem('token') || "";
 
@@ -100,6 +103,33 @@ const StaffDirectory = () => {
     }
   };
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const response = await axios.get('http://localhost:4000/admin/employee/export', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        responseType: 'blob' // Important for downloading files
+      });
+
+      // Create a blob URL and a temporary link to download the file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'employee_report.xlsx'); // Set the file name
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url); // Clean up the URL object
+    } catch (err) {
+      alert('Failed to download the Excel report.');
+      console.error('Export error:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const sortedEmployees = [...employees].sort((a, b) => {
     const [field, direction] = sortOrder.split('-');
     const aValue = field === 'name' ? `${a.first_name} ${a.last_name}` : a[field];
@@ -113,6 +143,13 @@ const StaffDirectory = () => {
 
   return (
     <div className="min-h-full bg-theme-50 p-4 sm:p-6 font-sans">
+      {/* Loading overlay for all API calls */}
+      {(loading || isLoading || isExporting) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/30">
+          <BoxLoader />
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-6 sm:p-8 mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Staff Directory</h1>
@@ -121,7 +158,18 @@ const StaffDirectory = () => {
         </p>
       </div>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex flex-col sm:flex-row justify-end items-center gap-4 mb-4">
+        {/* New Excel Report Button */}
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 sm:px-5 py-2 rounded-lg shadow-lg transition-colors"
+          disabled={isExporting}
+        >
+          <FileDown className="w-4 sm:w-5 h-4 sm:h-5" />
+          Excel Report
+        </button>
+
+        {/* Add Employee Button */}
         <button
           onClick={() => navigate('/home/staff/add')}
           className="flex items-center gap-2 bg-theme-500 hover:bg-theme-600 text-white font-semibold px-4 sm:px-5 py-2 rounded-lg shadow-lg transition-colors"
@@ -192,7 +240,7 @@ const StaffDirectory = () => {
             <div
               key={employee.employee_id}
               className="bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl 
-                transition-all duration-300 ease-in-out hover:-translate-y-1"
+              transition-all duration-300 ease-in-out hover:-translate-y-1"
             >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 sm:w-20 h-16 sm:h-20 bg-theme-100 rounded-full flex items-center justify-center mb-4">

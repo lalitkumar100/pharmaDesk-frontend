@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Building2, FileText, Calendar, BarChart3, ChevronRight } from 'lucide-react';
 import BoxLoader from "./BoxLoader";
+
+// Add a 'route' property to each report card object
 const reportCards = [
   {
     id: 1,
@@ -9,6 +12,7 @@ const reportCards = [
     description: "Track purchases by wholesaler",
     iconColor: "text-purple-600",
     bgHover: "hover:bg-purple-200",
+    route: "/home/reports/wholesaler",
   },
   {
     id: 2,
@@ -17,6 +21,7 @@ const reportCards = [
     description: "Monitor upcoming expirations",
     iconColor: "text-red-600",
     bgHover: "hover:bg-red-200",
+    route: "/home/reports/expiry",
   },
   {
     id: 3,
@@ -25,6 +30,7 @@ const reportCards = [
     description: "Analyze sales performance",
     iconColor: "text-green-600",
     bgHover: "hover:bg-green-200",
+    route: "/home/reports/invoice",
   },
   {
     id: 4,
@@ -33,23 +39,31 @@ const reportCards = [
     description: "Detailed sales analytics",
     iconColor: "text-blue-600",
     bgHover: "hover:bg-blue-200",
+    route: "/home/reports/sales-analytics",
   }
 ];
 
 const Reports = () => {
+  // Initialize the useNavigate hook to programmatically change routes
+  const navigate = useNavigate();
+
+  const handleCardClick = (route) => {
+    // Navigate to the specified route
+    navigate(route);
+  };
+
   return (
-    <div className="min-h-full bg-gray-100">
+    <div className="min-h-full bg-gray-100 p-8">
       {/* Overview Section */}
-      <div className="bg-gradient-to-r from-theme-50 to-theme-100 rounded-xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-teal-50 to-teal-100 rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">Reports Dashboard</h1>
         <p className="text-gray-600 text-lg mb-6">
           Access various reports to gain insights into your pharmacy operations
         </p>
-        {/* New Greenish Card */}
-        <div className="bg-theme-200 text-theme-800 p-4 rounded-lg flex items-center justify-between shadow-sm">
+        <div className="bg-teal-200 text-teal-800 p-4 rounded-lg flex items-center justify-between shadow-sm">
           <p className="font-semibold">Quick Insight:</p>
           <p className="text-sm">Sales are up 12% this month!</p>
-          <ChevronRight size={20} className="text-theme-600" />
+          <ChevronRight size={20} className="text-teal-600" />
         </div>
       </div>
 
@@ -63,6 +77,7 @@ const Reports = () => {
               className={`bg-white rounded-xl p-6 shadow-md hover:shadow-xl 
                 transition-all duration-300 ease-in-out hover:-translate-y-1 cursor-pointer
                 ${card.bgHover}`}
+              onClick={() => handleCardClick(card.route)}
             >
               <div className="flex flex-col items-center text-center">
                 <div className={`mb-4 ${card.iconColor}`}>

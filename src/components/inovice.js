@@ -1,371 +1,428 @@
 import React, { useState, useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
+import { Search, ArrowLeft, X, ChevronLeft, ChevronRight, Trash2, FileSpreadsheet } from 'lucide-react'; // Import FileSpreadsheet icon
+import { useNavigate } from 'react-router-dom';
 
-// Inline SVG icons for ArrowLeft and Search.
-const ArrowLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-gray-500">
-    <path d="M19 12H5"></path>
-    <path d="M12 19l-7-7 7-7"></path>
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-500">
-    <circle cx="11" cy="11" r="8"></circle>
-    <path d="m21 21-4.3-4.3"></path>
-  </svg>
-);
-
-// Mock data to simulate fetching from an API.
-const mockInvoices = [
-  {
-    sNo: 1,
-    invoiceNo: 'INV-2024001',
-    wholesaler: 'MedSupply Co. Ltd.',
-    totalAmount: 1500.75,
-    paidAmount: 1500.75,
-    status: 'Paid',
-    createdAt: '7/25/2024 4:00:00 PM',
-    medicines: [
-      { medicine: 'Paracetamol 500mg', qty: 100, price: 15.00 },
-      { medicine: 'Amoxicillin 250mg', qty: 50, price: 30.00 },
-    ],
-  },
-  {
-    sNo: 2,
-    invoiceNo: 'INV-2024002',
-    wholesaler: 'Global Pharma Distributors',
-    totalAmount: 2300.00,
-    paidAmount: 1500.00,
-    status: 'Partial',
-    createdAt: '7/24/2024 3:30:00 PM',
-    medicines: [
-      { medicine: 'Aspirin 81mg', qty: 200, price: 5.00 },
-      { medicine: 'Ibuprofen 400mg', qty: 100, price: 13.00 },
-    ],
-  },
-  {
-    sNo: 3,
-    invoiceNo: 'INV-2024003',
-    wholesaler: 'HealthBridge Wholesalers',
-    totalAmount: 850.50,
-    paidAmount: 0,
-    status: 'Unpaid',
-    createdAt: '7/23/2024 10:00:00 AM',
-    medicines: [
-      { medicine: 'Lisinopril 10mg', qty: 50, price: 17.01 },
-    ],
-  },
-  {
-    sNo: 4,
-    invoiceNo: 'INV-2024004',
-    wholesaler: 'Apex Drug House',
-    totalAmount: 3200.00,
-    paidAmount: 3200.00,
-    status: 'Paid',
-    createdAt: '7/22/2024 5:00:00 PM',
-    medicines: [
-      { medicine: 'Metformin 500mg', qty: 300, price: 10.67 },
-    ],
-  },
-  {
-    sNo: 5,
-    invoiceNo: 'INV-2024005',
-    wholesaler: 'Prime Medical Supplies',
-    totalAmount: 1100.00,
-    paidAmount: 500.00,
-    status: 'Partial',
-    createdAt: '7/21/2024 2:15:00 PM',
-    medicines: [
-      { medicine: 'Atorvastatin 20mg', qty: 100, price: 11.00 },
-    ],
-  },
+// --- MOCK DATA ---
+const initialInvoices = [
+    {
+        id: 'INV-2024001',
+        wholesaler: 'MedSupply Co. Ltd.',
+        createdAt: '2024-08-02T10:30:00Z',
+        totalAmount: 1500.75,
+        paidAmount: 1500.75,
+        status: 'Paid',
+        medicines: [
+            { name: 'Atorvastatin 10mg', qty: 70, price: 15.00 },
+            { name: 'Lisinopril 5mg', qty: 50, price: 9.015 },
+        ],
+    },
+    {
+        id: 'INV-2024002',
+        wholesaler: 'Global Pharma Distributors',
+        createdAt: '2024-08-01T14:00:00Z',
+        totalAmount: 2300.00,
+        paidAmount: 1000.00,
+        status: 'Partial',
+        medicines: [
+            { name: 'Metformin 500mg', qty: 100, price: 12.00 },
+            { name: 'Amlodipine 5mg', qty: 100, price: 11.00 },
+        ],
+    },
+    {
+        id: 'INV-2024003',
+        wholesaler: 'HealthBridge Wholesalers',
+        createdAt: '2024-07-30T09:15:00Z',
+        totalAmount: 850.50,
+        paidAmount: 0,
+        status: 'Unpaid',
+        medicines: [
+            { name: 'Losartan 50mg', qty: 120, price: 7.0875 },
+        ],
+    },
+    {
+        id: 'INV-2024004',
+        wholesaler: 'Apex Drug House',
+        createdAt: '2024-07-22T17:15:00Z',
+        totalAmount: 3200.00,
+        paidAmount: 3200.00,
+        status: 'Paid',
+        medicines: [
+            { name: 'Atorvastatin 10mg', qty: 70, price: 20.00 },
+            { name: 'Losartan 50mg', qty: 120, price: 10.00 },
+            { name: 'Amlodipine 5mg', qty: 90, price: 11.11 },
+        ],
+    },
+    {
+        id: 'INV-2024005',
+        wholesaler: 'Prime Medical Supplies',
+        createdAt: '2024-07-20T11:45:00Z',
+        totalAmount: 1100.00,
+        paidAmount: 500.00,
+        status: 'Partial',
+        medicines: [
+            { name: 'Simvastatin 20mg', qty: 80, price: 13.75 },
+        ],
+    },
 ];
 
-// Component for the invoice details modal
-const InvoiceDetailsModal = ({ invoice, onClose }) => {
-  if (!invoice) return null;
+// --- HELPER COMPONENTS ---
 
-  // Determine the tag style based on the payment status
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Paid': return 'bg-green-100 text-green-800';
-      case 'Partial': return 'bg-yellow-100 text-yellow-800';
-      case 'Unpaid': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between pb-4">
-          <div>
-            <h3 className="text-xl font-bold">Invoice Details</h3>
-            <p className="text-sm text-gray-500">Detailed information about this invoice.</p>
-          </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-500">
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        {/* Invoice Details Grid */}
-        <div className="grid grid-cols-2 gap-4 pb-4 border-b">
-          <div>
-            <div className="text-sm text-gray-500">Invoice No</div>
-            <div className="font-medium">{invoice.invoiceNo}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Wholesaler</div>
-            <div className="font-medium">{invoice.wholesaler}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Created At</div>
-            <div className="font-medium">{invoice.createdAt}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Total Amount</div>
-            <div className="font-medium">₹{invoice.totalAmount.toFixed(2)}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Paid Amount</div>
-            <div className="font-medium">₹{invoice.paidAmount.toFixed(2)}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Payment Status</div>
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusStyle(invoice.status)}`}>
-              {invoice.status}
-            </span>
-          </div>
-        </div>
-
-        {/* Medicines Table */}
-        <div className="pt-4">
-          <h4 className="text-lg font-semibold mb-2">Medicines in this Invoice</h4>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-gray-500">
-                <th className="py-2">Medicine</th>
-                <th className="py-2">Qty</th>
-                <th className="py-2">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.medicines.map((item, index) => (
-                <tr key={index} className="border-b">
-                  <td className="py-2">{item.medicine}</td>
-                  <td className="py-2">{item.qty}</td>
-                  <td className="py-2">₹{item.price.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Modal Actions */}
-        <div className="mt-6 flex justify-end space-x-2">
-          <button className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-            Delete Invoice
-          </button>
-          <button onClick={onClose} className="rounded-lg border px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+// Component for status badges (Paid, Unpaid, Partial)
+const StatusBadge = ({ status }) => {
+    const baseClasses = "px-3 py-1 text-xs font-medium rounded-full";
+    const statusClasses = {
+        Paid: "bg-green-100 text-green-800",
+        Unpaid: "bg-red-100 text-red-800",
+        Partial: "bg-yellow-100 text-yellow-800",
+    };
+    return <span className={`${baseClasses} ${statusClasses[status]}`}>{status}</span>;
 };
 
-// This component contains the main invoice list page logic
-const InvoiceListPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState('Recent to Oldest');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+// Component for the Invoice Details Modal
+const InvoiceDetailsModal = ({ invoice, onClose, onDelete }) => {
+    if (!invoice) return null;
 
-  // Get the style for the status tag
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Paid': return 'bg-green-100 text-green-800';
-      case 'Partial': return 'bg-yellow-100 text-yellow-800';
-      case 'Unpaid': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+    };
 
-  // Filter and sort the invoices based on state
-  const sortedInvoices = useMemo(() => {
-    let filtered = mockInvoices.filter(invoice =>
-      invoice.invoiceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      invoice.wholesaler.toLowerCase().includes(searchQuery.toLowerCase())
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="p-6 border-b sticky top-0 bg-white z-10">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-800">Invoice Details</h2>
+                        <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <X size={24} />
+                        </button>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">Detailed information about this invoice.</p>
+                </div>
+
+                <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p className="text-sm text-gray-500">Invoice No</p>
+                            <p className="font-semibold text-gray-800">{invoice.id}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Wholesaler</p>
+                            <p className="font-semibold text-gray-800">{invoice.wholesaler}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Created At</p>
+                            <p className="font-semibold text-gray-800">{formatDate(invoice.createdAt)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Total Amount</p>
+                            <p className="font-bold text-lg text-gray-900">₹{invoice.totalAmount.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Paid Amount</p>
+                            <p className="font-semibold text-gray-800">₹{invoice.paidAmount.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Payment Status</p>
+                            <StatusBadge status={invoice.status} />
+                        </div>
+                    </div>
+
+                    <div className="border-t pt-4">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Medicines in this Invoice</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left text-gray-500">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">Medicine</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Qty</th>
+                                        <th scope="col" className="px-6 py-3 text-right">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {invoice.medicines.map((med, index) => (
+                                        <tr key={index} className="bg-white border-b">
+                                            <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                                {med.name}
+                                            </th>
+                                            <td className="px-6 py-4 text-right">{med.qty}</td>
+                                            <td className="px-6 py-4 text-right">₹{med.price.toFixed(2)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-6 border-t flex justify-end items-center gap-4 sticky bottom-0 bg-white z-10">
+                    <button
+                        onClick={() => onDelete(invoice.id)}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                        <Trash2 size={16} />
+                        Delete Invoice
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- MAIN APP COMPONENT ---
+function Invoice() {
+    const [invoices, setInvoices] = useState(initialInvoices);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortOption, setSortOption] = useState('Recent to Oldest');
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const navigate = useNavigate();
+
+    const handleViewDetails = (invoice) => {
+        setSelectedInvoice(invoice);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedInvoice(null);
+    };
+
+    const handleDeleteInvoice = (invoiceId) => {
+        setInvoices(prev => prev.filter(inv => inv.id !== invoiceId));
+        handleCloseModal();
+    };
+
+    const handleGoBack = () => {
+        navigate('/home/reports');
+    };
+    
+    // Function to handle the Excel export
+    const handleExportToExcel = () => {
+        console.log('Exporting report to Excel...');
+        // In a real application, you would implement the logic here
+        // to convert `filteredAndSortedInvoices` data into an Excel file.
+    };
+
+    const filteredAndSortedInvoices = useMemo(() => {
+        let processedInvoices = [...invoices];
+
+        // Filtering
+        if (searchTerm) {
+            processedInvoices = processedInvoices.filter(invoice =>
+                invoice.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                invoice.wholesaler.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        // Sorting
+        switch (sortOption) {
+            case 'Recent to Oldest':
+                processedInvoices.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            case 'Oldest to Recent':
+                processedInvoices.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                break;
+            case 'Total Amount Low to High':
+                processedInvoices.sort((a, b) => a.totalAmount - b.totalAmount);
+                break;
+            case 'Total Amount High to Low':
+                processedInvoices.sort((a, b) => b.totalAmount - a.totalAmount);
+                break;
+            default:
+                break;
+        }
+
+        return processedInvoices;
+    }, [invoices, searchTerm, sortOption]);
+
+    // Pagination Logic
+    const totalItems = filteredAndSortedInvoices.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginatedInvoices = filteredAndSortedInvoices.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
     );
 
-    // Sort based on the selected option
-    switch (sortOption) {
-      case 'Recent to Oldest':
-        return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      case 'Oldest to Recent':
-        return filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      case 'Total Amount Low to High':
-        return filtered.sort((a, b) => a.totalAmount - b.totalAmount);
-      case 'Total Amount High to Low':
-        return filtered.sort((a, b) => b.totalAmount - a.totalAmount);
-      default:
-        return filtered;
-    }
-  }, [searchQuery, sortOption]);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
-  const handleViewClick = (invoice) => {
-    setSelectedInvoice(invoice);
-    setIsModalOpen(true);
-  };
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedInvoice(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100 p-4 font-sans">
-      <div className="mx-auto max-w-7xl">
-        {/* Header Section */}
-        <header className="flex items-center py-4 md:py-6">
-          <ArrowLeftIcon />
-          <h1 className="ml-4 text-2xl font-bold">Invoice List</h1>
-        </header>
-
-        {/* Filter and Search Section */}
-        <div className="flex flex-col gap-4 py-4 md:flex-row md:items-center">
-          <div className="relative flex-1">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by invoice no or wholesaler..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="relative">
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="w-full appearance-none rounded-lg border border-gray-300 bg-white py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 md:w-auto"
-            >
-              <option>Recent to Oldest</option>
-              <option>Oldest to Recent</option>
-              <option>Total Amount Low to High</option>
-              <option>Total Amount High to Low</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                <path d="M6 9l6 6 6-6"></path>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Table View */}
-        <div className="hidden overflow-x-auto rounded-lg bg-white shadow-md md:block">
-          <h2 className="bg-green-50 p-4 text-lg font-semibold text-gray-800">Invoice List</h2>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-green-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  S.No
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Invoice No
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Wholesaler
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Total Amount
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Paid
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {sortedInvoices.map((invoice, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{invoice.sNo}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{invoice.invoiceNo}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">{invoice.wholesaler}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">₹{invoice.totalAmount.toFixed(2)}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusStyle(invoice.status)}`}>
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+    return (
+        <div className="bg-gray-50 min-h-screen font-sans">
+            <div className="container mx-auto p-4 md:p-8">
+                {/* Header */}
+                <header className="flex items-center justify-between mb-6">
+                    <div className="flex items-center">
+                        <button onClick={handleGoBack} className="p-2 rounded-full hover:bg-gray-200 mr-4">
+                            <ArrowLeft size={24} className="text-gray-700" />
+                        </button>
+                        <h1 className="text-3xl font-bold text-gray-800">Invoice List</h1>
+                    </div>
+                    {/* Excel Report Button */}
                     <button
-                      onClick={() => handleViewClick(invoice)}
-                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={handleExportToExcel}
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition-colors shadow-md"
                     >
-                      View
+                        <FileSpreadsheet size={20} />
+                        Excel Report
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                </header>
 
-        {/* Mobile List View */}
-        <div className="md:hidden">
-          <h2 className="mb-4 bg-green-50 p-4 text-lg font-semibold text-gray-800 rounded-t-lg">Invoice List</h2>
-          <div className="flex flex-col space-y-4">
-            {sortedInvoices.map((invoice, index) => (
-              <div key={index} className="rounded-lg bg-white p-4 shadow-md">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-bold text-gray-800">{invoice.invoiceNo}</div>
-                    <div className="text-sm text-gray-500">{invoice.wholesaler}</div>
-                    <div className="mt-1 text-base font-semibold text-gray-700">Total: ₹{invoice.totalAmount.toFixed(2)}</div>
-                  </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusStyle(invoice.status)}`}>
-                      {invoice.status}
-                    </span>
-                    <button
-                      onClick={() => handleViewClick(invoice)}
-                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      View
-                    </button>
-                  </div>
+                {/* Search and Filter Controls */}
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative flex-grow">
+                        <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by invoice no or wholesaler..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <div className="relative">
+                        <select
+                            value={sortOption}
+                            onChange={(e) => {
+                                setSortOption(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="w-full md:w-auto appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            <option>Recent to Oldest</option>
+                            <option>Oldest to Recent</option>
+                            <option>Total Amount Low to High</option>
+                            <option>Total Amount High to Low</option>
+                        </select>
+                    </div>
                 </div>
-              </div>
-            ))}
-          </div>
+
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block">
+                        <table className="w-full text-left">
+                            <thead className="bg-cyan-50 border-b border-cyan-200">
+                                <tr>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">S.No</th>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">Invoice No</th>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">Wholesaler</th>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">Total Amount</th>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
+                                    <th className="p-4 text-sm font-semibold text-gray-600">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {paginatedInvoices.map((invoice, index) => (
+                                    <tr key={invoice.id} className="border-b last:border-b-0 hover:bg-gray-50">
+                                        <td className="p-4 text-gray-500">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                        <td className="p-4 font-medium text-gray-800">{invoice.id}</td>
+                                        <td className="p-4 text-gray-600">{invoice.wholesaler}</td>
+                                        <td className="p-4 font-semibold text-gray-800">₹{invoice.totalAmount.toFixed(2)}</td>
+                                        <td className="p-4"><StatusBadge status={invoice.status} /></td>
+                                        <td className="p-4">
+                                            <button
+                                                onClick={() => handleViewDetails(invoice)}
+                                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                                            >
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden">
+                        <div className="bg-cyan-50 p-4 text-center font-semibold text-cyan-800">Invoice List</div>
+                        {paginatedInvoices.map((invoice) => (
+                            <div key={invoice.id} className="border-b p-4">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="font-bold text-lg text-gray-800">{invoice.id}</p>
+                                        <p className="text-gray-600">{invoice.wholesaler}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleViewDetails(invoice)}
+                                        className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm"
+                                    >
+                                        View
+                                    </button>
+                                </div>
+                                <div className="flex justify-between items-center mt-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Total</p>
+                                        <p className="font-semibold text-gray-800">₹{invoice.totalAmount.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 text-right">Status</p>
+                                        <StatusBadge status={invoice.status} />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="flex flex-col md:flex-row justify-between items-center p-4 bg-white border-t">
+                        <p className="text-sm text-gray-600 mb-2 md:mb-0">
+                            Page {currentPage} of {totalPages} ({totalItems} total items)
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft size={16} />
+                                Prev
+                            </button>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Next
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal */}
+            <InvoiceDetailsModal
+                invoice={selectedInvoice}
+                onClose={handleCloseModal}
+                onDelete={handleDeleteInvoice}
+            />
         </div>
+    );
+}
 
-        {/* Pagination Section */}
-        <div className="mt-6 flex flex-col items-center justify-between space-y-2 md:flex-row">
-          <div className="flex space-x-2">
-            <button className="rounded-lg border px-4 py-2 text-gray-500 hover:bg-gray-100">Prev</button>
-            <button className="rounded-lg border px-4 py-2 text-gray-500 hover:bg-gray-100">Next</button>
-          </div>
-          <span className="text-sm text-gray-500">
-            Page 1 of 1 ({sortedInvoices.length} total items)
-          </span>
-        </div>
-      </div>
-
-      {/* Render the modal if isModalOpen is true */}
-      <InvoiceDetailsModal invoice={selectedInvoice} onClose={handleCloseModal} />
-    </div>
-  );
-};
-
-
+export default Invoice;
