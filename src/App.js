@@ -11,6 +11,7 @@ import Invoice from './components/Admin/reportFeature/invoice';
 import Wholesaler from './components/Admin/reportFeature/wholesaler';
 import AccessDenied from './components/AccessDenial';
 import Worker from './components/Worker/Home';
+import AddMedicineModal from './components/Admin/StockEntry/AddMedicineModal';
 // We'll move the imports for AddStock and StockManagement into the Home component
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
          <Route path="/forgot-password" element={<ForgotPassword />} />
        <Route path="/Access-Denied" element={<AccessDenied />} />
        <Route path="/Worker" element={<Worker />} />
+       <Route path="/modals" element={<AddMedicineModal />} />
         {/*
           This is the new parent route for all dashboard-related pages.
           The '*' means that any path starting with "/home" will match.

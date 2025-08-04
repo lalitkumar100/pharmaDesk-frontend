@@ -1,364 +1,433 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Eye, User, Calendar, X, ChevronsUpDown, DollarSign, ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import axios from 'axios';
-// import Url from '../../../url'
+import React, { useState } from "react";
+import axios from "axios";
+import AddMedicineModal from "./AddMedicineModal";
+import RandomColorLoader from "../../looader/RandomColorLoader"; // specife loader
+import BoxLoader from "../../looader/BoxLoader"; // normal loader
+import {
+  PlusCircle,
+  Trash2,
+  Loader2,
+  PackagePlus,
+  AlertTriangle,
+  FileUp,
+} from "lucide-react";
 
-// --- AXIOS API INSTANCE WITHOUT AUTHORIZATION INTERCEPTOR ---
-// We'll manually add the headers now, so the interceptor is removed.
-const api = axios.create({
-  baseURL: 'http://localhost:4000',
-});
+// It's better to manage the base URL and token in a more centralized way,
+// e.g., using an Axios instance or environment variables.
+import BASE_URL from "../../../config";
+const token = localStorage.getItem("lalitkumar_choudhary") || "";
 
-// Interceptor is removed as per your request.
-// If you want to keep it as a fallback, you could wrap it in a condition.
+function StockEntryResponsive() {
+  // --- STATE MANAGEMENT ---
+  const [wholesaler, setWholesaler] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [date, setDate] = useState("");
+  const [medicines, setMedicines] = useState([]);
+  const [showAddMedicineModal, setShowAddMedicineModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fileProcessing, setFileProcessing] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-// --- MOCK API RESPONSES (for fallback if needed) ---
-const mockSalesListResponse = {
-  status: "success",
-  count: 22,
-  data: [
-    { sale_id: 1, sale_no: "00125Aug1VLCG", sale_date: "2025-08-03T10:06:16.082Z", customer_name: "Maria Garcia", employee_name: "Amit Verma", payment_method: "Cash", total_amount: "130.00", profit: "98.00" },
-    { sale_id: 2, sale_no: "00125Aug1VLC0", sale_date: "2025-08-03T10:06:00.703Z", customer_name: "LALIT CHOUDHARY", employee_name: "Amit Verma", payment_method: "UPI", total_amount: "250.50", profit: "150.00" },
-    { sale_id: 3, sale_no: "00125Aug2ABC1", sale_date: "2025-08-02T15:20:10.000Z", customer_name: "Robert Wilson", employee_name: "Priya Singh", payment_method: "Credit", total_amount: "75.00", profit: "30.00" },
-    { sale_id: 4, sale_no: "00125Aug2DEF2", sale_date: "2025-08-02T14:05:30.000Z", customer_name: "Emily Davis", employee_name: "Amit Verma", payment_method: "Cash", total_amount: "320.75", profit: "120.25" },
-    { sale_id: 5, sale_no: "00125Aug3GHI3", sale_date: "2025-08-01T11:45:00.000Z", customer_name: "John Smith", employee_name: "Rahul Kumar", payment_method: "UPI", total_amount: "180.00", profit: "90.00" },
-  ]
-};
+  // --- HANDLERS ---
+  const handleAddMedicine = (medicine) => {
+    setMedicines((prev) => [...prev, medicine]);
+  };
 
-const mockSaleDetailResponse = {
-    status: "success",
-    data: {
-        sale_id: 2,
-        sale_no: "00125Aug1VLC0",
-        sale_date: "2025-08-03T10:06:00.703Z",
-        customer_name: "LALIT CHOUDHARY",
-        contact_number: "9902903433",
-        employee_name: "Amit Verma",
-        payment_method: "UPI",
-        total_amount: "250.50",
-        profit: "150.00",
-        sale_items: [
-            { medicine_name: "Paracetamol", rate: 50, expiry_date: "2026-05-01", quantity: 2, purchase_price: 12 },
-            { medicine_name: "Omeprazole", rate: 30, expiry_date: "2026-06-01", quantity: 1, purchase_price: 10 },
-            { medicine_name: "Vitamin C", rate: 120.50, expiry_date: "2025-12-01", quantity: 1, purchase_price: 80 },
-        ]
-    }
-};
+  const handleDeleteMedicine = (idx) => {
+    setMedicines((prev) => prev.filter((_, i) => i !== idx));
+  };
 
+  const clearForm = () => {
+    setWholesaler("");
+    setInvoiceNumber("");
+    setDate("");
+    setMedicines([]);
+    setError(null);
+    setMessage(null);
+  };
 
-// --- HELPER FUNCTIONS & COMPONENTS ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setMessage(null);
 
-const formatRupees = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-    }).format(amount);
-};
+    if (!wholesaler || !invoiceNumber || !date) {
+      setError("Please fill in all invoice details.");
+      return;
+    }
+    if (medicines.length === 0) {
+      setError("Please add at least one medicine to the list.");
+      return;
+    }
 
-const getPaymentMethodColor = (method) => {
-    switch (method?.toLowerCase()) {
-        case 'cash': return 'bg-theme-100 text-theme-800';
-        case 'upi': return 'bg-blue-100 text-blue-800';
-        case 'credit': return 'bg-orange-100 text-orange-800';
-        default: return 'bg-gray-100 text-gray-800';
-    }
-};
-
-const Loader = ({ text = "Loading..." }) => (
-    <div className="flex flex-col justify-center items-center gap-4">
-        <Loader2 className="animate-spin text-theme-500" size={48} />
-        <p className="text-lg text-gray-600">{text}</p>
-    </div>
-);
-
-// --- SUB-COMPONENTS ---
-
-const SaleDetailsModal = ({ sale, onClose, isLoading }) => {
-  if (!sale) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
-        {isLoading && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex justify-center items-center z-20 rounded-2xl">
-                <Loader text="Fetching details..." />
-            </div>
-        )}
-        
-        <div className="p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Sale Details</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X size={24} />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-center gap-3 bg-theme-50 p-3 rounded-lg">
-              <User className="text-theme-500" size={20} />
-              <div>
-                <p className="text-gray-500">Customer</p>
-                <p className="font-semibold text-gray-800">{sale.customer_name || 'N/A'}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-theme-50 p-3 rounded-lg">
-              <User className="text-theme-500" size={20} />
-              <div>
-                <p className="text-gray-500">Employee</p>
-                <p className="font-semibold text-gray-800">{sale.employee_name}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 bg-theme-50 p-3 rounded-lg">
-              <Calendar className="text-theme-500" size={20} />
-              <div>
-                <p className="text-gray-500">Date & Time</p>
-                <p className="font-semibold text-gray-800">
-                  {new Date(sale.sale_date).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Sale Items</h3>
-          <div className="space-y-4">
-            {sale.sale_items?.map((item, index) => (
-              <div key={index} className="bg-white border-2 border-theme-200 rounded-xl p-4 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <h4 className="font-bold text-gray-800 text-lg">{item.medicine_name}</h4>
-                  <p className="font-bold text-theme-600 text-lg">{formatRupees(item.rate * item.quantity)}</p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-3 text-sm">
-                  <div><p className="text-gray-500">Rate:</p><p className="font-semibold text-gray-700">{formatRupees(item.rate)}</p></div>
-                  <div><p className="text-gray-500">Quantity:</p><p className="font-semibold text-gray-700">{item.quantity}</p></div>
-                  <div><p className="text-gray-500">Expiry Date:</p><p className="font-semibold text-gray-700">{item.expiry_date}</p></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-6 mt-4 sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent">
-            <div className="bg-theme-50 p-5 rounded-xl space-y-3">
-                <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-theme-800">Total Amount</span>
-                    <span className="text-3xl font-extrabold text-theme-700">{formatRupees(sale.total_amount)}</span>
-                </div>
-                 <div className="flex justify-between items-center border-t border-theme-200 pt-3">
-                    <span className="text-gray-600 font-semibold">Payment Method</span>
-                    <span className={`px-3 py-1 text-sm font-bold rounded-full ${getPaymentMethodColor(sale.payment_method)}`}>
-                        {sale.payment_method}
-                    </span>
-                </div>
-            </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-// --- MAIN COMPONENT ---
-export default function App() {
-  const [sales, setSales] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchField, setSearchField] = useState('sale_no');
-  const [sortConfig, setSortConfig] = useState({ key: 'sale_date', direction: 'descending' });
-  
-  const [selectedSale, setSelectedSale] = useState(null);
-  const [isModalLoading, setIsModalLoading] = useState(false);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const salesPerPage = 20;
-
-  // --- DATA FETCHING ---
-  useEffect(() => {
-    const fetchSales = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      // Manually retrieve token for this specific request
-      const token = localStorage.getItem('authToken');
-
-      try {
-        const response = await api.get('/admin/sales', {
+    setLoading(true);
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/admin/medicine_stock`,
+        {
+          wholesaler,
+          invoiceNumber,
+          date,
+          medicine: medicines, // API expects 'medicine' key
+        },
+        {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Manually added header
+            Authorization: `Bearer ${token}`,
           },
-        });
-        
-        if (response.data && response.data.status === 'success') {
-          setSales(response.data.data);
-        } else {
-          throw new Error("Failed to fetch sales data: Invalid response format.");
-        }
+        }
+      );
 
-      } catch (err) {
-        setError(err.message);
-        console.error("Fetch sales error:", err);
-        // Fallback to mock data on error, for a more resilient UI
-        setSales(mockSalesListResponse.data);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchSales();
-  }, []);
+      if (res.status === 200) {
+        setMessage(res.data.message || "Stock entry added successfully!");
+        clearForm();
+      } else {
+        setError(res.data.message || "Failed to add stock entry.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "A server error occurred. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+      // Automatically clear messages after a few seconds
+      setTimeout(() => {
+        setMessage(null);
+        setError(null);
+      }, 5000);
+    }
+  };
 
-  const handleViewClick = async (sale) => {
-    setSelectedSale(sale);
-    setIsModalLoading(true);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      handleSubmitFile(file);
+    }
+  };
 
-    // Manually retrieve token for this specific request
-    const token = localStorage.getItem('authToken');
+  const handleSubmitFile = async (file) => {
+    setFileProcessing(true); // Start the file processing loader and blur
+    setError(null);
+    setMessage(null);
 
-    try {
-        const response = await api.get(`/sales/${sale.sale_no}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Manually added header
-          },
-        });
-        
-        if (response.data && response.data.status === 'success') {
-            setSelectedSale(response.data.data);
-        } else {
-            throw new Error("Failed to fetch sale details.");
-        }
-    } catch (err) {
-        console.error("Fetch sale details error:", err);
-        // Fallback to mock data on error
-        setSelectedSale(mockSaleDetailResponse.data);
-    } finally {
-        setIsModalLoading(false);
-    }
-  };
+    const formData = new FormData();
+    formData.append("invoice", file); // 'invoice' should match the key expected by the backend
 
+    try {
+      const res = await axios.post(`${BASE_URL}/admin/api/process-invoice`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  // --- FILTERING, SORTING, PAGINATION ---
-  const filteredSales = useMemo(() => {
-    if (!sales) return [];
-    let searchableItems = [...sales];
+      if (res.status === 200) {
+        const { wholesaler, invoiceNumber, date, medicines: apiMedicines } = res.data;
+        
+        // Validate if the API returned any medicines
+        if (apiMedicines && apiMedicines.length > 0) {
+          setWholesaler(wholesaler);
+          setInvoiceNumber(invoiceNumber);
+          setDate(date);
+          setMedicines(apiMedicines);
+          setMessage("Invoice processed successfully! Details have been filled.");
+        } else {
+          setError("Invoice processed, but no medicine items were found. Please add them manually.");
+          // Clear any previously filled form data to avoid confusion
+          clearForm();
+        }
+      } else {
+        setError(res.data.message || "Failed to process invoice.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "A server error occurred during file upload."
+      );
+    } finally {
+      setFileProcessing(false); // End the file processing loader and blur
+      // Automatically clear messages after a few seconds
+      setTimeout(() => {
+        setMessage(null);
+        setError(null);
+      }, 5000);
+    }
+  };
 
-    if (searchTerm) {
-      searchableItems = searchableItems.filter(sale => {
-        const fieldValue = sale[searchField] ? String(sale[searchField]) : '';
-        return fieldValue.toLowerCase().includes(searchTerm.toLowerCase());
-      });
-    }
-
-    searchableItems.sort((a, b) => {
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
-        if (sortConfig.direction === 'ascending') {
-            return aValue > bValue ? 1 : -1;
-        }
-        return aValue < bValue ? 1 : -1;
-    });
-
-    return searchableItems;
-  }, [sales, searchTerm, searchField, sortConfig]);
-
-  useEffect(() => { setCurrentPage(1); }, [searchTerm, searchField, sortConfig]);
-
-  const totalPages = Math.ceil(filteredSales.length / salesPerPage);
-  const paginatedSales = useMemo(() => {
-    const startIndex = (currentPage - 1) * salesPerPage;
-    return filteredSales.slice(startIndex, startIndex + salesPerPage);
-  }, [filteredSales, currentPage, salesPerPage]);
-
-  const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
-  
-  // --- RENDER LOGIC ---
-  if (isLoading) {
-    return (
-        <div className="fixed inset-0 bg-theme-700/5 backdrop-blur-sm flex justify-center items-center z-50">
-            <Loader text="Loading Sales Report..." />
-        </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center p-10 text-red-500">Error: {error}</div>;
-  }
-
-  return (
-    <div className="bg-theme-50 min-h-screen font-sans">
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="flex items-center gap-4 mb-8">
-            <button className="text-theme-500 hover:text-theme-800 p-2 rounded-full hover:bg-theme-200 transition-colors"><ArrowLeft size={24} /></button>
-            <div className="flex-grow flex justify-between items-center">
-                 <h1 className="text-3xl font-bold text-gray-800">Sales Report</h1>
-                 <div className="bg-theme-200 text-gray-700 text-sm font-semibold px-3 py-1 rounded-full">{sales.length} Sales</div>
-            </div>
-        </header>
-
-        <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <div className="relative md:col-span-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-400" size={20} />
-              <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-theme-500" />
-            </div>
-            <div className="relative md:col-span-1">
-               <select value={searchField} onChange={e => setSearchField(e.target.value)} className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-theme-500">
-                  <option value="sale_no">Sale No</option>
-                  <option value="customer_name">Customer Name</option>
-                  <option value="employee_name">Employee Name</option>
-               </select>
-               <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-400 pointer-events-none" size={20} />
-            </div>
-            <div className="relative md:col-span-1">
-               <select onChange={e => setSortConfig({ ...sortConfig, direction: e.target.value })} className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-theme-500">
-                  <option value="descending">Newest First</option>
-                  <option value="ascending">Oldest First</option>
-               </select>
-               <ChevronsUpDown className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-400 pointer-events-none" size={20} />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="p-6"><h2 className="text-xl font-bold text-gray-800">Sales Transactions</h2></div>
-            <div className="hidden md:block">
-                <table className="w-full text-left">
-                    <thead className="border-b border-gray-200"><tr>
-                        <th className="p-4 text-sm font-semibold text-gray-500">Sale No</th>
-                        <th className="p-4 text-sm font-semibold text-gray-500">Customer Name</th>
-                        <th className="p-4 text-sm font-semibold text-gray-500">Employee Name</th>
-                        <th className="p-4 text-sm font-semibold text-gray-500">Total Amount</th>
-                        <th className="p-4 text-sm font-semibold text-gray-500 text-right">Action</th>
-                    </tr></thead>
-                    <tbody>{paginatedSales.map((sale) => (
-                        <tr key={sale.sale_id} className="border-b border-gray-100 last:border-b-0">
-                            <td className="p-4 font-mono text-xs text-gray-700">{sale.sale_no}</td>
-                            <td className="p-4 font-medium text-gray-800">{sale.customer_name}</td>
-                            <td className="p-4 text-gray-600">{sale.employee_name}</td>
-                            <td className="p-4 font-semibold text-theme-600">{formatRupees(sale.total_amount)}</td>
-                            <td className="p-4 text-right"><button onClick={() => handleViewClick(sale)} className="bg-theme-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-theme-600 transition"><Eye size={16} />View</button></td>
-                        </tr>
-                    ))}</tbody>
-                </table>
-            </div>
-            {paginatedSales.length === 0 && <div className="text-center p-10 text-gray-500"><p>No sales found.</p></div>}
-        </div>
-
-        {totalPages > 1 && (
-            <div className="bg-white rounded-xl shadow-sm mt-6 p-4 flex items-center justify-between text-sm text-gray-600">
-                <div>Page <span className="font-bold">{currentPage}</span> of <span className="font-bold">{totalPages}</span></div>
-                <div className="flex items-center gap-2">
-                    <button onClick={handlePrevPage} disabled={currentPage === 1} className="px-3 py-2 border rounded-lg flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"><ChevronLeft size={16} />Previous</button>
-                    <button onClick={handleNextPage} disabled={currentPage === totalPages} className="px-3 py-2 border rounded-lg flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">Next<ChevronRight size={16} /></button>
-                </div>
-            </div>
-        )}
-      </div>
-
-      {selectedSale && <SaleDetailsModal sale={selectedSale} onClose={() => setSelectedSale(null)} isLoading={isModalLoading} />}
-    </div>
-  );
+  // --- RENDER ---
+  return (
+    <>
+      {/* File processing loader overlay */}
+      {fileProcessing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75 backdrop-blur-sm">
+          <RandomColorLoader />
+        </div>
+      )}
+      <div className="min-h-screen bg-slate-100 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl">
+          {/* Main layout grid: 1 column on mobile, 2 columns on large screens */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+            {/* --- LEFT COLUMN: FORM DETAILS --- */}
+            <div className="lg:col-span-2">
+              <div className="sticky p-6 bg-white rounded-lg shadow-md top-8">
+                <h2 className="mb-6 text-2xl font-bold text-slate-800">
+                  Stock Entry Details
+                </h2>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label
+                      htmlFor="wholesaler"
+                      className="block mb-1 text-sm font-medium text-slate-600"
+                    >
+                      Wholesaler <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="wholesaler"
+                      type="text"
+                      className="w-full px-3 py-2 border rounded-md border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      value={wholesaler}
+                      onChange={(e) => setWholesaler(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="invoiceNumber"
+                      className="block mb-1 text-sm font-medium text-slate-600"
+                    >
+                      Invoice No <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="invoiceNumber"
+                      type="text"
+                      className="w-full px-3 py-2 border rounded-md border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      value={invoiceNumber}
+                      onChange={(e) => setInvoiceNumber(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="date"
+                      className="block mb-1 text-sm font-medium text-slate-600"
+                    >
+                      Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="date"
+                      type="date"
+                      className="w-full px-3 py-2 border rounded-md border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  {/* --- MESSAGES --- */}
+                  <div className="pt-4 space-y-3">
+                    {error && (
+                      <div
+                        className="p-3 text-sm text-red-800 bg-red-100 rounded-lg"
+                        role="alert"
+                      >
+                        {error}
+                      </div>
+                    )}
+                    {message && (
+                      <div
+                        className="p-3 text-sm text-green-800 bg-green-100 rounded-lg"
+                        role="alert"
+                      >
+                        {message}
+                      </div>
+                    )}
+                  </div>
+                  {/* --- ACTION BUTTONS --- */}
+                  <div className="flex flex-col gap-3 pt-6 sm:flex-row">
+                    <button
+                      type="submit"
+                      className="flex items-center justify-center w-full px-6 py-2.5 font-semibold text-white bg-indigo-600 rounded-md shadow-sm sm:w-auto hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-300"
+                      disabled={loading || fileProcessing}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Entry"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearForm}
+                      className="w-full px-6 py-2.5 font-semibold text-slate-700 bg-slate-200 rounded-md sm:w-auto hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50"
+                      disabled={loading || fileProcessing}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            {/* --- RIGHT COLUMN: MEDICINE LIST --- */}
+            <div className="lg:col-span-3">
+              <div className="p-6 bg-white rounded-lg shadow-md">
+                <div className="flex flex-col items-start justify-between gap-4 mb-5 sm:flex-row sm:items-center">
+                  <h3 className="text-2xl font-bold text-slate-800">
+                    Medicine Items ({medicines.length})
+                  </h3>
+                  <div className="flex gap-2">
+                    <label
+                      htmlFor="file-upload"
+                      className="flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md shadow-sm cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      <FileUp size={20} />
+                      Upload img/pdf
+                    </label>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept="image/*, application/pdf"
+                      disabled={loading || fileProcessing}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAddMedicineModal(true)}
+                      className="flex items-center justify-center gap-2 px-4 py-2 font-semibold text-white bg-green-600 rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      disabled={loading || fileProcessing}
+                    >
+                      <PlusCircle size={20} />
+                      Add Medicine
+                    </button>
+                  </div>
+                </div>
+                {/* --- RESPONSIVE MEDICINE LIST --- */}
+                <div className="space-y-4">
+                  {medicines.length === 0 ? (
+                    <div className="py-12 text-center border-2 border-dashed rounded-lg border-slate-200">
+                      <PackagePlus className="w-12 h-12 mx-auto mb-2 text-slate-400" />
+                      <p className="font-medium text-slate-500">
+                        No medicines added yet.
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        Upload an invoice to fill automatically or click "Add Medicine" to enter manually.
+                      </p>
+                    </div>
+                  ) : (
+                    medicines.map((med, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 transition-all duration-300 bg-white border rounded-lg shadow-sm border-slate-200 hover:shadow-md hover:border-indigo-200"
+                      >
+                        {/* Card Header */}
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-bold text-indigo-700">
+                              {med.medicine_name}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              {med.brand_name}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="p-1 text-red-500 rounded-full hover:bg-red-100 hover:text-red-700"
+                            onClick={() => handleDeleteMedicine(idx)}
+                            aria-label="Delete medicine"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        {/* Card Body - Responsive Grid */}
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4 text-sm sm:grid-cols-3 md:grid-cols-4">
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              Batch No.
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {med.batch_no}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              Quantity
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {med.stock_quantity}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              MRP
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              ₹{med.mrp}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              Purchase
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              ₹{med.purchase_price}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              Packed Type
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {med.packed_type}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-medium text-slate-500">
+                              MFG Date
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {med.mfg_date}
+                            </span>
+                          </div>
+                          <div
+                            className={
+                              new Date(med.expiry_date) < new Date()
+                                ? "text-red-600"
+                                : ""
+                            }
+                          >
+                            <span className="block text-xs font-medium text-slate-500">
+                              Expiry Date
+                            </span>
+                            <span className="font-semibold">
+                              {med.expiry_date}{" "}
+                              {new Date(med.expiry_date) < new Date() && (
+                                <AlertTriangle className="inline w-4 h-4 ml-1" />
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* --- MODAL --- */}
+      {showAddMedicineModal && (
+        <AddMedicineModal
+          onClose={() => setShowAddMedicineModal(false)}
+          onAddMedicine={handleAddMedicine}
+        />
+      )}
+    </>
+  );
 }
+
+export default StockEntryResponsive;

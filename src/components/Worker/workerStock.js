@@ -5,8 +5,8 @@ import BoxLoader from '../looader/BoxLoader';
 import { FileDown } from 'lucide-react';
 
 // --- API Configuration ---
-const BASE_URL = 'http://localhost:4000';
-const BEARER_TOKEN = localStorage.getItem("token") || "";
+import BASE_URL from '../../config';
+const BEARER_TOKEN = localStorage.getItem("lalitkumar_choudhary") || "";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -136,55 +136,119 @@ const SearchDropdown = ({ searchField, setSearchField }) => {
   );
 };
 
-// --- Modal Component (Read-only) ---
-const MedicineDetailsModal = ({ isOpen, onClose, medicine }) => {
+// --- Modal Component (Rewritten) ---
+const MedicineModal = ({ isOpen, onClose, medicine, onUpdate, onDelete, setLoading }) => {
+  const [formData, setFormData] = useState(medicine || {});
+  const [message, setMessage] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (medicine) {
+      setFormData(medicine);
+      setMessage('');
+      setIsEditing(false); // Reset editing state when modal opens
+    }
+  }, [medicine]);
+
   if (!isOpen || !medicine) {
     return null;
   }
 
-  const formFields = Object.keys(medicine).filter(key => key !== 'created_at');
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    // First click: Enable editing
+    if (!isEditing) {
+      setIsEditing(true);
+      setMessage('You can now edit the form. Click "Confirm Update" to save.');
+      return;
+    }
+
+    // Second click: Send PUT request
+    setLoading(true);
+    try {
+      const updatedData = { ...formData };
+      delete updatedData.created_at;
+      delete updatedData.id;
+      console.log(medicine.id);
+
+      const response = await api.put(`/admin/medicine_stock/${medicine.id}`, updatedData);
+      onUpdate(response.data);
+      setMessage('Update successful!');
+    } catch (err) {
+      setMessage('Failed to update.');
+      console.error('Update error:', err);
+    } finally {
+      setLoading(false);
+      setIsEditing(false); // Reset after request
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this medicine?')) return;
+    setLoading(true);
+    try {
+      await api.delete(`/admin/medicine_stock/${medicine.id}`);
+      onDelete(medicine.id);
+      setMessage('Deletion successful!');
+    } catch (err) {
+      setMessage('Failed to delete.');
+      console.error('Delete error:', err);
+    } finally {
+      setLoading(false);
+      setIsEditing(false);
+    }
+  };
+
+  const formFields = Object.keys(formData).filter(key => key !== 'created_at');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl">
         <div className="flex items-center justify-between border-b pb-4">
-          <h2 className="text-xl font-bold">Medicine Details</h2>
+          <h2 className="text-xl font-bold">Update Medicine Stock</h2>
           <button onClick={onClose} className="rounded-full p-2 hover:bg-gray-100">
             <X size={20} className="text-gray-600" />
           </button>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
+        <form className="mt-6 grid grid-cols-2 gap-4 text-sm text-gray-700">
           {formFields.map((key) => {
+            const isNonEditable = key === 'id'; // Keep id non-editable
             const isDate = key.includes('date');
             return (
               <div key={key}>
                 <label className="font-semibold">{key.replace(/_/g, ' ')}</label>
                 <input
-                  type="text"
+                  type={isDate ? 'date' : 'text'}
                   name={key}
-                  value={isDate ? formatDate(medicine[key]) : medicine[key] || ''}
-                  className="w-full rounded-md border border-gray-300 p-2 bg-gray-100 text-gray-500 cursor-not-allowed"
-                  disabled
+                  value={isDate ? (formData[key] ? new Date(formData[key]).toISOString().split('T')[0] : '') : formData[key] || ''}
+                  onChange={isNonEditable ? null : handleChange}
+                  className={`w-full rounded-md border border-gray-300 p-2 ${isNonEditable || !isEditing ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'focus:border-blue-500 focus:outline-none'}`}
+                  disabled={isNonEditable || !isEditing}
                 />
               </div>
             );
           })}
-        </div>
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-          >
-            Close
-          </button>
-        </div>
+        </form>
+        {message && (
+          <div className={`mt-4 text-center font-semibold ${message.includes('successful') ? 'text-green-600' : message.includes('edit') ? 'text-blue-600' : 'text-red-600'}`}>
+            <p>{message}</p>
+          </div>
+        )}
+
       </div>
     </div>
   );
 };
 
 // --- Main Component ---
-export default function WorkerStock() {
+export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState('medicine_name');
   const [sortOption, setSortOption] = useState('A-Z');
@@ -200,6 +264,7 @@ export default function WorkerStock() {
     setIsLoading(true);
     try {
       const response = await api.get('/admin/medicine_stock');
+      // The crucial fix: Assuming the API now returns a unique 'id' field
       setMedicineData(response.data.rows);
       setError(null);
     } catch (err) {
@@ -233,6 +298,18 @@ export default function WorkerStock() {
   useEffect(() => {
     fetchMedicineData();
   }, []);
+
+  const handleUpdate = (updatedMedicine) => {
+    setMedicineData((prevData) =>
+      prevData.map((med) => (med.id === updatedMedicine.id ? updatedMedicine : med))
+    );
+    setSelectedMedicine(updatedMedicine);
+  };
+
+  const handleDelete = (deletedId) => {
+    setMedicineData((prevData) => prevData.filter((med) => med.id !== deletedId));
+    setIsModalOpen(false);
+  };
 
   const filteredData = medicineData.filter(medicine => {
     const value = medicine[searchField];
@@ -468,10 +545,13 @@ export default function WorkerStock() {
           </div>
         </div>
       </div>
-      <MedicineDetailsModal
+      <MedicineModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         medicine={selectedMedicine}
+        onUpdate={handleUpdate}
+        onDelete={handleDelete}
+        setLoading={setIsLoading} // Pass the global loading state setter
       />
     </div>
   );

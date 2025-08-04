@@ -5,7 +5,7 @@ import BoxLoader from '../looader/BoxLoader';
 import { FileDown } from 'lucide-react';
 
 // --- API Configuration ---
-const BASE_URL = 'http://localhost:4000';
+import BASE_URL from '../../config';
 const BEARER_TOKEN = localStorage.getItem("lalitkumar_choudhary") || "";
 
 const api = axios.create({

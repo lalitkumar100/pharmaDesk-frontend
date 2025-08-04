@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Calendar, MapPin, User, Users, Briefcase, DollarSign } from 'lucide-react';
 import axios from 'axios';
 import BoxLoader from "../../looader/BoxLoader";
+import BASE_URL from '../../../config';
+
 const EmployeeForm = ({ mode = 'add' }) => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const token = localStorage.getItem('token') || '';
+  const token = localStorage.getItem('lalitkumar_choudhary') || '';
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,7 +22,9 @@ const EmployeeForm = ({ mode = 'add' }) => {
     role: 'worker',
     date_of_joining: '',
     salary: '',
-    status: 'Active'
+    status: 'Active',
+    aadhar_card_no: '',
+    pan_card_no: '',
   });
 
   useEffect(() => {
@@ -33,17 +36,17 @@ const EmployeeForm = ({ mode = 'add' }) => {
   const fetchEmployeeData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/admin/employee/${id}`, {
+      const response = await axios.get(`${BASE_URL}/admin/employee/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
       const employeeData = response.data.employees[0];
       setFormData({
         ...employeeData,
         date_of_birth: new Date(employeeData.date_of_birth).toISOString().split('T')[0],
-        date_of_joining: new Date(employeeData.date_of_joining).toISOString().split('T')[0]
+        date_of_joining: new Date(employeeData.date_of_joining).toISOString().split('T')[0],
       });
     } catch (err) {
       setError('Failed to fetch employee data');
@@ -60,29 +63,21 @@ const EmployeeForm = ({ mode = 'add' }) => {
 
     try {
       if (mode === 'update') {
-        await axios.put(
-          `http://localhost:4000/admin/employee/${id}`,
-          formData,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
+        await axios.put(`${BASE_URL}/admin/employee/${id}`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
       } else {
-        await axios.post(
-          'http://localhost:4000/admin/employee',
-          formData,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
+        await axios.post(`${BASE_URL}/admin/employee`, formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
       }
-      navigate('/staff');
+      navigate('/home/staff');
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
       console.error('Error:', err);
@@ -92,18 +87,16 @@ const EmployeeForm = ({ mode = 'add' }) => {
   };
 
   const handleDelete = async () => {
-    // IMPORTANT: Do NOT use window.confirm(). Use a custom modal UI for confirmation.
-    // For this example, I'm keeping it as is, but for a production app, replace this.
     if (window.confirm('Are you sure you want to delete this employee?')) {
       setLoading(true);
       try {
-        await axios.delete(`http://localhost:4000/admin/employee/${id}`, {
+        await axios.delete(`${BASE_URL}/admin/employee/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
-        navigate('/home');
+        navigate('/home/staff');
       } catch (err) {
         setError('Failed to delete employee');
         console.error('Error:', err);
@@ -125,9 +118,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
       </div>
 
       {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-theme-500 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+        <div className="flex justify-center items-center py-20">
+          <BoxLoader />
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6">
@@ -141,14 +133,14 @@ const EmployeeForm = ({ mode = 'add' }) => {
             {/* Personal Information */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Personal Information</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                 <input
                   type="text"
                   value={formData.first_name}
-                  onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
@@ -158,8 +150,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   type="text"
                   value={formData.last_name}
-                  onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
@@ -168,8 +160,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                 <select
                   value={formData.gender}
-                  onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -182,8 +174,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   type="date"
                   value={formData.date_of_birth}
-                  onChange={(e) => setFormData({...formData, date_of_birth: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
@@ -192,13 +184,13 @@ const EmployeeForm = ({ mode = 'add' }) => {
             {/* Employment Information */}
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Employment Information</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="worker">Worker</option>
                   <option value="admin">Admin</option>
@@ -210,8 +202,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -224,8 +216,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   type="date"
                   value={formData.date_of_joining}
-                  onChange={(e) => setFormData({...formData, date_of_joining: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, date_of_joining: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
@@ -235,25 +227,25 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   type="number"
                   value={formData.salary}
-                  onChange={(e) => setFormData({...formData, salary: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
             </div>
 
-            {/* Contact Information - Full Width */}
+            {/* Contact Info */}
             <div className="space-y-4 md:col-span-2">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
-                    {...(mode === 'update' ? { disabled: true } : {})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  disabled={mode === 'update'}
                   required
                 />
               </div>
@@ -263,8 +255,8 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <input
                   type="tel"
                   value={formData.contact_number}
-                  onChange={(e) => setFormData({...formData, contact_number: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
+                  onChange={(e) => setFormData({ ...formData, contact_number: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
@@ -273,40 +265,39 @@ const EmployeeForm = ({ mode = 'add' }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                 <input
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
-                  rows="3"
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar no</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Aadhar Number</label>
                 <input
                   value={formData.aadhar_card_no}
-                  onChange={(e) => setFormData({...formData, aadhar_card_no: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
-                  rows="3"
+                  onChange={(e) => setFormData({ ...formData, aadhar_card_no: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">pan_card_no</label>
-                <input 
+                <label className="block text-sm font-medium text-gray-700 mb-1">PAN Card Number</label>
+                <input
                   value={formData.pan_card_no}
-                  onChange={(e) => setFormData({...formData, pan_card_no: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-theme-500"
-                  rows="3"
+                  onChange={(e) => setFormData({ ...formData, pan_card_no: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
               </div>
             </div>
           </div>
 
-          {/* Form Actions */}
+          {/* Actions */}
           <div className="mt-8 flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => navigate('/staff')}
+              onClick={() => navigate('/home/staff')}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
             >
               Cancel

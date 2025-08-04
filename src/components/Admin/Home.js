@@ -84,6 +84,13 @@ const Home = () => {
   const handleChatToggle = () => {
     setChatSidebarOpen(!chatSidebarOpen);
   };
+  const handleLogout = () => {
+    // 1. Delete the token from localStorage
+    localStorage.removeItem('lalitkumar_choudhary'); // Use the same key you used to store it
+
+    // 2. Navigate to the login page
+    navigate('/login');
+};
 
   return (
     <div className="relative z-0 min-h-screen flex bg-gradient-to-br from-theme-50 to-theme-100">
@@ -135,7 +142,7 @@ const Home = () => {
         </nav>
         {/* Logout Button */}
         <div className="absolute bottom-0 w-full px-4 sm:px-6 py-4 sm:py-5 border-t border-theme-100">
-          <button className="flex items-center space-x-2 text-gray-500 hover:text-red-600 font-medium w-full justify-center p-2 rounded-md hover:bg-red-50 transition-colors">
+          <button className="flex items-center space-x-2 text-gray-500 hover:text-red-600 font-medium w-full justify-center p-2 rounded-md hover:bg-red-50 transition-colors" onClick={handleLogout}>
             <LogOut className="w-4 sm:w-5 h-4 sm:h-5" />
             <span>Logout</span>
           </button>

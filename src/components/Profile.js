@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import RandomColorLoader from './looader/RandomColorLoader'; // Import the new loader component
 import BoxLoader  from './looader/BoxLoader';
+import BASE_URL from '../config';
 
 const Profile = () => {
   const [userData, setUserData] = useState({
@@ -44,14 +45,14 @@ const Profile = () => {
   // Fetch user data on component mount
   useEffect(() => {
     console.log('Profile component mounted'); // Debug log
-    console.log('Current localStorage token:', localStorage.getItem('token')); // Debug log
+    console.log('Current localStorage token:', localStorage.getItem('lalitkumar_choudhary')); // Debug log
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
     try {
       // Get token from localStorage
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('lalitkumar_choudhary');
       console.log('Token:', token); // Debug log
 
       if (!token) {
@@ -60,7 +61,7 @@ const Profile = () => {
         return;
       }
 
-      const response = await axios.get('http://localhost:4000/profile', {
+      const response = await axios.get(`${BASE_URL}/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

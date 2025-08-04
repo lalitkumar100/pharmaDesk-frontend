@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Shell, Sparkles, X } from 'lucide-react';
-import RandomColorLoader from './looader/RandomColorLoader'; // Import the new component
+import RandomColorLoader from './looader/RandomColorLoader';
+import BASE_URL from '../config';
 
 function ChatBotApp({ onClose }) {
   const [messages, setMessages] = useState([]);
@@ -13,6 +14,8 @@ function ChatBotApp({ onClose }) {
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const backendUrl = `http://${BASE_URL}/admin/api/chat`;
+  const token = localStorage.getItem("lalitkumar_choudhary");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,47 +57,28 @@ function ChatBotApp({ onClose }) {
     });
   };
 
-  const callGeminiApi = async (payload, model = 'gemini-2.5-flash-preview-05-20') => {
-    const apiKey = 'AIzaSyDZrqy9EZ-9ZONYihdU6HxUCcORXdVHORI';
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // New function to send requests to the backend
+  const sendToBackend = async (payload) => {
+    try {
+      const response = await fetch(backendUrl, {
+        method: 'POST',
+        headers: {     
+            'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+         },
+        body: JSON.stringify(payload),
+      });
 
-    let response;
-    let result;
-    const maxRetries = 5;
-    let retryCount = 0;
-    let delay = 1000;
-
-    while (retryCount < maxRetries) {
-      try {
-        response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          result = await response.json();
-          return result;
-        } else if (response.status === 429 || response.status >= 500) {
-          console.warn(`API call failed with status ${response.status}. Retrying in ${delay / 1000}s...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          delay *= 2;
-          retryCount++;
-        } else {
-          const errorData = await response.json();
-          throw new Error(`API error: ${response.status} - ${errorData.message || response.statusText}`);
-        }
-      } catch (err) {
-        if (retryCount === maxRetries - 1) {
-          throw err;
-        }
-        console.error(`Fetch error (retry ${retryCount + 1}):`, err);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2;
-        retryCount++;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending request to backend:', error);
+      throw error;
     }
-    throw new Error('Max retries exceeded for API call.');
   };
 
   const handleSendMessage = async () => {
@@ -112,38 +96,31 @@ function ChatBotApp({ onClose }) {
     };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-    let chatHistory = [];
-
     try {
+      const chatHistory = [{
+        role: 'user',
+        parts: [{ text: inputText.trim() }],
+      }];
+
+      const payload = {
+        messages: chatHistory,
+      };
+
       if (selectedImage) {
         const base64ImageData = await fileToBase64(selectedImage);
-        chatHistory.push({
-          role: 'user',
-          parts: [
-            { text: inputText.trim() },
-            {
-              inlineData: {
-                mimeType: selectedImage.type,
-                data: base64ImageData,
-              },
-            },
-          ],
-        });
-      } else {
-        chatHistory.push({ role: 'user', parts: [{ text: inputText.trim() }] });
+        payload.image = base64ImageData;
+        payload.mimeType = selectedImage.type;
       }
 
-      const payload = { contents: chatHistory };
-      const result = await callGeminiApi(payload);
-
-      if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const botResponseText = result.candidates[0].content.parts[0].text;
+      const result = await sendToBackend(payload);
+      
+      if (result?.text) {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { type: 'bot', text: botResponseText },
+          { type: 'bot', text: result.text },
         ]);
       } else {
-        throw new Error('Invalid API response structure.');
+        throw new Error('Invalid API response structure from backend.');
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -178,12 +155,14 @@ function ChatBotApp({ onClose }) {
       }).join('\n');
 
       const prompt = `Please provide a concise summary of the following conversation:\n\n${conversationText}`;
-      const payload = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+      const payload = {
+        messages: [{ role: 'user', parts: [{ text: prompt }] }],
+      };
 
-      const result = await callGeminiApi(payload);
+      const result = await sendToBackend(payload);
 
-      if (result?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const summaryText = result.candidates[0].content.parts[0].text;
+      if (result?.text) {
+        const summaryText = result.text;
         setMessages((prevMessages) => [
           ...prevMessages,
           { type: 'bot', text: `✨ Chat Summary:\n${summaryText}` },
@@ -200,30 +179,42 @@ function ChatBotApp({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col h-full font-sans bg-stone-900 text-gray-100">
+    <div className="flex flex-col h-full font-sans bg-[#2a2a2a] text-[#f0f0f0] rounded-lg shadow-2xl">
       {/* Header */}
-<header className="flex items-center justify-between p-4 bg-gradient-to-r from-stone-700 to-stone-900 text-white shadow-lg rounded-b-xl **flex-wrap gap-y-2**">
-  {/* Left side of the header */}
-  <div className="flex items-center **w-full sm:w-auto**">
-    <h3 className="text-xl **sm:text-2xs** font-bold tracking-wide flex items-center">
-      Hello, it's <Shell className="mx-2 text-stone-300" size={28} /> 
-    </h3>
-  </div>
-
-  {/* Right side of the header with buttons */}
-  <div className="flex items-center space-x-2 **ml-auto**">
-
-    {onClose && (
-      <button
-        onClick={onClose}
-        className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-stone-700"
-        aria-label="Close chat"
-      >
-        <X size={24} />
-      </button>
-    )}
-  </div>
-</header>
+      <header className="flex items-center justify-between p-4 bg-gradient-to-r from-[#2c4e4e] to-[#4e7d7d] text-white shadow-lg rounded-t-xl">
+        <div className="flex items-center">
+          <h3 className="text-xl font-bold tracking-wide flex items-center">
+            Hello, it's <Shell className="mx-2 text-[#b0e0e6]" size={28} />
+          </h3>
+        </div>
+        <div className="flex items-center space-x-2 ml-auto">
+          <button
+            onClick={handleSummarizeChat}
+            className={`p-2 rounded-md transition-colors ${
+              isSummarizing
+                ? 'bg-[#1a2d2d] text-[#a0a0a0] cursor-not-allowed'
+                : 'text-white bg-[#5f9ea0] hover:bg-[#4d8c8e]'
+            }`}
+            disabled={isSummarizing}
+            aria-label="Summarize chat"
+          >
+            {isSummarizing ? (
+              <RandomColorLoader className="h-6 w-6" />
+            ) : (
+              <Sparkles size={24} />
+            )}
+          </button>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 rounded-md text-gray-200 hover:text-white hover:bg-[#2c4e4e]"
+              aria-label="Close chat"
+            >
+              <X size={24} />
+            </button>
+          )}
+        </div>
+      </header>
 
       {/* Chat Messages Display Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
@@ -234,21 +225,21 @@ function ChatBotApp({ onClose }) {
           >
             {msg.type === 'bot' && (
               <div className="flex-shrink-0 mr-3 mt-1">
-                <Shell className="text-stone-400" size={24} />
+                <Shell className="text-[#a0e0e6]" size={24} />
               </div>
             )}
             <div
-              className={`max-w-[70%] p-3 rounded-xl shadow-md **sm:max-w-[60%]** ${
+              className={`max-w-[70%] p-3 rounded-xl shadow-md sm:max-w-[60%] ${
                 msg.type === 'user'
-                  ? 'bg-stone-600 text-white rounded-br-none'
-                  : 'bg-stone-800 text-gray-200 rounded-bl-none'
+                  ? 'bg-[#3d7c7c] text-white rounded-br-none'
+                  : 'bg-[#2c4e4e] text-gray-200 rounded-bl-none'
               }`}
             >
               {msg.image && (
                 <img
                   src={msg.image}
                   alt="Uploaded preview"
-                  className="max-h-24 w-auto rounded-md mb-2 border border-gray-700"
+                  className="max-h-24 w-auto rounded-md mb-2 border border-[#4e7d7d]"
                 />
               )}
               <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -258,19 +249,19 @@ function ChatBotApp({ onClose }) {
         {isLoading && (
           <div className="flex justify-start items-center">
             <div className="flex-shrink-0 mr-3 mt-1">
-              <Shell className="text-stone-400 animate-pulse" size={24} />
+              <Shell className="text-[#a0e0e6] animate-pulse" size={24} />
             </div>
-            <div className="bg-stone-800 p-3 rounded-xl shadow-md rounded-bl-none">
+            <div className="bg-[#2c4e4e] p-3 rounded-xl shadow-md rounded-bl-none">
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className="w-2 h-2 bg-[#5f9ea0] rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                <div className="w-2 h-2 bg-[#5f9ea0] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-[#5f9ea0] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
               </div>
             </div>
           </div>
         )}
         {error && (
-          <div className="text-red-400 text-center p-2 bg-red-900 rounded-lg">
+          <div className="text-[#e6b0b0] text-center p-2 bg-[#5c2d2d] rounded-lg">
             {error}
           </div>
         )}
@@ -278,13 +269,13 @@ function ChatBotApp({ onClose }) {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-stone-800 border-t border-gray-700 shadow-inner rounded-t-xl">
+      <div className="p-4 bg-[#2c4e4e] border-t border-[#4e7d7d] shadow-inner rounded-b-xl">
         {imagePreviewUrl && (
-          <div className="relative mb-3 p-2 border border-gray-600 rounded-lg bg-stone-700">
+          <div className="relative mb-3 p-2 border border-[#4e7d7d] rounded-lg bg-[#3d7c7c]">
             <img src={imagePreviewUrl} alt="Image Preview" className="max-h-24 w-auto rounded-md mx-auto" />
             <button
               onClick={handleRemoveImage}
-              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 text-xs hover:bg-red-700 transition-colors"
+              className="absolute top-1 right-1 bg-[#d32f2f] text-white rounded-full p-1 text-xs hover:bg-[#e53935] transition-colors"
               aria-label="Remove image"
             >
               <svg
@@ -305,10 +296,9 @@ function ChatBotApp({ onClose }) {
           </div>
         )}
         <div className="flex items-end space-x-3">
-          {/* Image Upload Button */}
           <label
             htmlFor="imageUpload"
-            className="flex-shrink-0 p-3 bg-stone-700 text-stone-200 rounded-full cursor-pointer hover:bg-stone-600 transition-colors shadow-sm"
+            className="flex-shrink-0 p-3 bg-[#3d7c7c] text-[#a0e0e6] rounded-full cursor-pointer hover:bg-[#4e8d8e] transition-colors shadow-sm"
             title="Upload Image"
           >
             <svg
@@ -331,13 +321,13 @@ function ChatBotApp({ onClose }) {
               accept="image/*"
               className="hidden"
               onChange={handleImageChange}
+              disabled={isLoading || isSummarizing}
             />
           </label>
 
-          {/* Resizable Textarea */}
           <textarea
             ref={textareaRef}
-            className="flex-1 resize-none overflow-hidden p-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-500 text-gray-100 bg-stone-700 transition-all duration-200 **text-sm sm:text-base**"
+            className="flex-1 resize-none overflow-hidden p-3 border border-[#4e7d7d] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#a0e0e6] text-gray-100 bg-[#3d7c7c] transition-all duration-200 text-sm sm:text-base"
             placeholder="Type your message..."
             rows="1"
             value={inputText}
@@ -351,13 +341,12 @@ function ChatBotApp({ onClose }) {
             disabled={isLoading || isSummarizing}
           ></textarea>
 
-          {/* Send Button */}
           <button
             onClick={handleSendMessage}
             className={`flex-shrink-0 p-3 rounded-full shadow-lg transition-all duration-200 ${
               isLoading || isSummarizing || (!inputText.trim() && !selectedImage)
-                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-stone-500 text-white hover:bg-stone-600'
+                ? 'bg-[#3d7c7c] text-[#a0a0a0] cursor-not-allowed'
+                : 'bg-[#5f9ea0] text-white hover:bg-[#4d8c8e]'
             }`}
             disabled={isLoading || isSummarizing || (!inputText.trim() && !selectedImage)}
             title="Send Message"
@@ -402,21 +391,21 @@ function ChatBotApp({ onClose }) {
           </button>
         </div>
       </div>
-      {/* Custom Scrollbar Styling (for webkit browsers) */}
+      {/* Custom Scrollbar Styling */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #4e6d78ff;
+          background: #3d7c7c;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #4e4f4fff;
+          background: #5f9ea0;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #748baaff;
+          background: #a0e0e6;
         }
       `}</style>
     </div>

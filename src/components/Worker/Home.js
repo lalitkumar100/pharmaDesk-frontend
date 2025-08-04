@@ -11,10 +11,8 @@ import { useNavigate, Routes, Route, useLocation } from 'react-router-dom';
 
 // Import all the components that will be rendered inside Worker
 import StockManagement from './workerStock';
-import Billing from '../Billing';
-
 import ChatbotApp from '../ChatbotApp'; // Import the Chatbot App component
-
+import Billing from '../Billing';
 /**
  * Worker component for a simplified dashboard.
  *

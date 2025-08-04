@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import BoxLoader from "./looader/BoxLoader";
+import BASE_URL from '../config';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -15,7 +16,7 @@ const ForgotPassword = () => {
 
     try {
       // Replace with your actual API URL
-      const response = await axios.post('http://localhost:4000/forgot-password', { email });
+      const response = await axios.post(`${BASE_URL}forgot-password`, { email });
       
       if (response.status === 200) {
         setMessage(response.data.message || 'Password reset email sent successfully!');

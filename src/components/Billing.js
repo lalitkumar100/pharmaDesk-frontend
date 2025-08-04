@@ -1,108 +1,85 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import axios from 'axios';
 import BoxLoader from "./looader/BoxLoader";
-// NOTE: You must replace these placeholders with your actual API URL and token.
-const BaseUrl = 'https://your-api-domain.com'; // Replace with your API base URL
-const bearerToken = 'your_super_secret_token'; // Replace with your actual bearer token
+import { Import } from 'lucide-react';
 
-// Utility function to handle API calls with exponential backoff
-const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+
+// Base URL: replace with your actual API domain
+
+import BASE_URL from '../config';
+// Axios instance factory (adds bearer token)
+const getToken = () => localStorage.getItem("lalitkumar_choudhary") || "";
+
+const axiosInstance = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Request helper with simple retry logic
+const requestWithRetry = async (config, retries = 2, backoff = 500) => {
     try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
+        const token = getToken();
+        if (!config.headers) config.headers = {};
+        config.headers.Authorization = `Bearer ${token}`;
+        return await axiosInstance.request(config);
+    } catch (err) {
         if (retries > 0) {
-            console.warn(`API request failed. Retrying in ${delay / 1000}s...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            return fetchWithRetry(url, options, retries - 1, delay * 2);
-        } else {
-            throw error;
+            await new Promise(r => setTimeout(r, backoff));
+            return requestWithRetry(config, retries - 1, backoff * 2);
         }
+        throw err;
     }
 };
 
-// New API functions to handle real network requests
+// API functions
 const api = {
-    // Fetches medicine suggestions based on a query
     fetchSuggestions: async (query) => {
         try {
-            const url = `${BaseUrl}/route`; // Assuming this route handles all requests
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${bearerToken}`,
-                },
-                // The payload structure is an assumption; you might need to adjust this
-                body: JSON.stringify({ action: 'search_suggestions', query }),
+            const response = await requestWithRetry({
+                method: 'GET',
+                url: `/admin/medicines/recommendation`,
+                params: { query },
             });
-            // Assuming the API returns a similar structure to the mock data
-            return {
-                status: response.status,
-                message: response.message,
-                recommdation: response.recommdation || [],
-            };
+            // expecting response.data.recommendations[]
+            return { status: 'success', recommendations: response.data.recommendations || [] };
         } catch (error) {
             console.error("Error fetching suggestions:", error);
-            // Return a default error object to prevent app from crashing
-            return { status: 'error', message: 'Failed to fetch suggestions.', recommdation: [] };
+            return { status: 'error', message: 'Failed to fetch suggestions.', recommendations: [] };
         }
     },
-
-    // Fetches detailed information for a specific medicine and batch
-    fetchMedicineDetails: async (medicineId, batchNo) => {
+    fetchMedicineDetails: async (medicineId) => {
         try {
-            const url = `${BaseUrl}/route`; // Assuming this route handles all requests
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${bearerToken}`,
-                },
-                // Assuming this is the payload format for fetching details
-                body: JSON.stringify({ action: 'fetch_details', medicineId, batchNo }),
+            const response = await requestWithRetry({
+                method: 'GET',
+                url: `/admin/medicne_info/${medicineId}`,
             });
-            // Assuming the API returns a similar structure
-            return {
-                status: response.status,
-                message: response.message,
-                medicine: response.medicine || [],
-            };
+            // assuming full medicine info in response.data (or array)
+            return { status: 'success', medicine: response.data };
         } catch (error) {
             console.error("Error fetching medicine details:", error);
-            return { status: 'error', message: 'Failed to fetch medicine details.', medicine: [] };
+            return { status: 'error', message: 'Failed to fetch medicine details.', medicine: null };
         }
     },
-
-    // Generates a new bill with the provided data
-    generateBill: async (billData) => {
+    generateBill: async (billPayload) => {
         try {
-            const url = `${BaseUrl}/route`; // Assuming this route handles all requests
-            const response = await fetchWithRetry(url, {
+            const response = await requestWithRetry({
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${bearerToken}`,
-                },
-                // The payload structure matches the required format from the original code
-                body: JSON.stringify({ action: 'generate_bill', ...billData }),
+                url: `/admin/sales`,
+                data: billPayload,
             });
-            // Assuming the API returns a similar structure
-            return {
-                status: response.status,
-                message: response.message,
-            };
+            return { status: 'success', message: response.data.message || 'Bill generated successfully.' };
         } catch (error) {
             console.error("Error generating bill:", error);
-            return { status: 'error', message: 'Failed to generate bill.' };
+            const msg = error?.response?.data?.message || 'Failed to generate bill.';
+            return { status: 'error', message: msg };
         }
     }
 };
 
-// Utility function to debounce API calls
+// Debounce util
 const debounce = (func, delay) => {
     let timeout;
     return (...args) => {
@@ -147,7 +124,38 @@ const AlertModal = ({ message, onClose }) => {
 };
 
 export default function Billing() {
-    // State for managing the three bills
+    // Theme definitions for each bill
+    const billThemes = [
+        {
+            bg: 'bg-purple-100',
+            btnBg: 'bg-purple-600',
+            btnText: 'text-purple-700',
+            btnHoverBg: 'hover:bg-purple-700',
+            activeNav: 'bg-purple-600 text-white',
+            inactiveNavBg: 'bg-purple-100',
+            inactiveNavText: 'text-purple-700',
+        },
+        {
+            bg: 'bg-green-100',
+            btnBg: 'bg-green-600',
+            btnText: 'text-green-700',
+            btnHoverBg: 'hover:bg-green-700',
+            activeNav: 'bg-green-600 text-white',
+            inactiveNavBg: 'bg-green-100',
+            inactiveNavText: 'text-green-700',
+        },
+        {
+            bg: 'bg-blue-100',
+            btnBg: 'bg-blue-600',
+            btnText: 'text-blue-700',
+            btnHoverBg: 'hover:bg-blue-700',
+            activeNav: 'bg-blue-600 text-white',
+            inactiveNavBg: 'bg-blue-100',
+            inactiveNavText: 'text-blue-700',
+        },
+    ];
+
+    // State
     const [bills, setBills] = useState([
         { customerName: '', contactNumber: '', paymentMethod: 'Cash', medicines: [] },
         { customerName: '', contactNumber: '', paymentMethod: 'Cash', medicines: [] },
@@ -155,7 +163,6 @@ export default function Billing() {
     ]);
     const [activeBillIndex, setActiveBillIndex] = useState(0);
 
-    // State for the "Add Medicine" modal
     const [showModal, setShowModal] = useState(false);
     const [modalForm, setModalForm] = useState({
         medicineName: '',
@@ -164,7 +171,7 @@ export default function Billing() {
         quantity: 1,
         sellPrice: '',
         medicineId: null,
-        batchNo: ''
+        batchNo: '',
     });
     const [suggestions, setSuggestions] = useState([]);
     const [suggestionLoading, setSuggestionLoading] = useState(false);
@@ -175,6 +182,10 @@ export default function Billing() {
 
     const activeBill = bills[activeBillIndex];
 
+    // Ref for autofocus
+    const medicineInputRef = useRef(null);
+
+    // Handlers
     const handleBillChange = (index) => {
         setActiveBillIndex(index);
     };
@@ -199,7 +210,7 @@ export default function Billing() {
             quantity: 1,
             sellPrice: '',
             medicineId: null,
-            batchNo: ''
+            batchNo: '',
         });
         setSuggestions([]);
         setSelectedSuggestionIndex(-1);
@@ -214,14 +225,22 @@ export default function Billing() {
         setModalAlert({ show: false, message: '' });
     };
 
+    // Auto-focus when modal opens
+    useEffect(() => {
+        if (showModal && medicineInputRef.current) {
+            medicineInputRef.current.focus();
+        }
+    }, [showModal]);
+
+    // Debounced fetch
     const debouncedFetchSuggestions = useCallback(
         debounce(async (query) => {
-            if (query.length > 1) {
+            if (query.trim().length > 1) {
                 setSuggestionLoading(true);
                 try {
                     const response = await api.fetchSuggestions(query);
                     if (response.status === "success") {
-                        setSuggestions(response.recommdation);
+                        setSuggestions(response.recommendations || []);
                     }
                 } catch (error) {
                     console.error("Error fetching suggestions:", error);
@@ -237,16 +256,19 @@ export default function Billing() {
 
     const handleMedicineNameChange = (e) => {
         const value = e.target.value;
-        setModalForm(prev => ({ ...prev, medicineName: value }));
+        setModalForm(prev => ({ ...prev, medicineName: value, medicineId: null, batchNo: '' }));
         debouncedFetchSuggestions(value);
         setSelectedSuggestionIndex(-1);
     };
 
     const handleSuggestionSelect = useCallback(async (suggestion) => {
         try {
-            const response = await api.fetchMedicineDetails(suggestion.medicine_id, suggestion.batch_no);
-            if (response.status === "success" && response.medicine.length > 0) {
-                const medicine = response.medicine[0];
+            const response = await api.fetchMedicineDetails(suggestion.medicine_id);
+            if (response.status === "success" && response.medicine) {
+                    console.log(response);
+                const medicine = response.medicine.medicine[0];
+                    console.log(medicine);
+                    
                 setModalForm({
                     medicineName: `${medicine.medicine_name} (${medicine.batch_no})`,
                     purchasePrice: medicine.purchase_price,
@@ -254,12 +276,16 @@ export default function Billing() {
                     quantity: 1,
                     sellPrice: medicine.mrp,
                     medicineId: medicine.medicine_id,
-                    batchNo: medicine.batch_no
+                    batchNo: medicine.batch_no,
                 });
                 setSuggestions([]);
+                setSelectedSuggestionIndex(-1);
+            } else {
+                setModalAlert({ show: true, message: "Could not load medicine details." });
             }
         } catch (error) {
             console.error("Error fetching medicine details:", error);
+            setModalAlert({ show: true, message: "Failed to fetch medicine details." });
         }
     }, []);
 
@@ -281,7 +307,6 @@ export default function Billing() {
     const handleAddToBill = () => {
         const { quantity, stockQuantity, sellPrice, purchasePrice, medicineName, medicineId, batchNo } = modalForm;
 
-        // Validation checks
         if (parseFloat(sellPrice) < parseFloat(purchasePrice)) {
             setModalAlert({ show: true, message: "Sell Price is less than Purchase Price!" });
             return;
@@ -309,7 +334,7 @@ export default function Billing() {
         const newBills = [...bills];
         newBills[activeBillIndex] = {
             ...newBills[activeBillIndex],
-            medicines: [...newBills[activeBillIndex].medicines, newMedicine]
+            medicines: [...newBills[activeBillIndex].medicines, newMedicine],
         };
         setBills(newBills);
         handleCloseModal();
@@ -324,20 +349,20 @@ export default function Billing() {
         const billPayload = {
             customer_name: activeBill.customerName,
             contact_number: activeBill.contactNumber,
-            employee_id: 3, // Hardcoded as per request
+            employee_id: 3, // Hardcoded per earlier
             payment_method: activeBill.paymentMethod,
             medicines: activeBill.medicines.map(med => ({
                 medicine_id: med.medicine_id,
                 quantity: med.quantity,
                 rate: String(med.price_per_unit),
-            }))
+            })),
         };
 
         try {
             const response = await api.generateBill(billPayload);
             if (response.status === "success") {
                 setBillMessage({ show: true, message: response.message, type: 'success' });
-                // Reset the current bill
+                // Reset current bill
                 const newBills = [...bills];
                 newBills[activeBillIndex] = {
                     customerName: '',
@@ -359,18 +384,23 @@ export default function Billing() {
     };
 
     return (
-        <div className="min-h-screen bg-green-50 text-gray-800 p-4 font-sans flex items-start justify-center">
+        <div className={`min-h-screen bg-white text-gray-800 p-4 font-sans flex items-start justify-center`}>
             {/* Main Billing Container */}
-            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl p-6 lg:p-10 my-8">
+            <div className={`w-full max-w-5xl ${billThemes[activeBillIndex].bg}  rounded-2xl shadow-xl p-6 lg:p-10 my-8`}>
 
                 {/* Header */}
                 <div className="flex items-center space-x-4 mb-8">
-                    <button onClick={() => console.log('Go back')} className="text-green-600 hover:text-green-800 transition-colors p-2">
+                    <button
+                        onClick={() => console.log('Go back')}
+                        className={`${
+                            billThemes[activeBillIndex].btnText
+                        } hover:opacity-80 transition-colors p-2`}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-                    <h1 className="text-2xl font-bold text-green-700">Medicine Billing</h1>
+                    <h1 className={`text-2xl font-bold ${billThemes[activeBillIndex].btnText}`}>Medicine Billing</h1>
                 </div>
 
                 {/* Customer Details & Actions */}
@@ -418,7 +448,7 @@ export default function Billing() {
                 <div className="flex justify-end mb-6">
                     <button
                         onClick={handleOpenModal}
-                        className="bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-green-700 transition-colors"
+                        className={`${billThemes[activeBillIndex].btnBg} text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-colors ${billThemes[activeBillIndex].btnHoverBg}`}
                     >
                         Add Medicine
                     </button>
@@ -465,7 +495,7 @@ export default function Billing() {
                     <button
                         onClick={handleGenerateBill}
                         disabled={isGeneratingBill || activeBill.medicines.length === 0}
-                        className="bg-green-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className={`${billThemes[activeBillIndex].btnBg} text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-colors ${billThemes[activeBillIndex].btnHoverBg} disabled:bg-gray-400 disabled:cursor-not-allowed`}
                     >
                         {isGeneratingBill ? 'Generating...' : 'Generate New Bill'}
                     </button>
@@ -473,7 +503,7 @@ export default function Billing() {
 
                 {/* Success/Error Message */}
                 {billMessage.show && (
-                    <div className={`mt-4 p-4 rounded-lg text-white font-semibold text-center transition-opacity duration-300 ${billMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+                    <div className={`mt-4 p-4 rounded-lg font-semibold text-center transition-opacity duration-300 ${billMessage.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
                         {billMessage.message}
                     </div>
                 )}
@@ -486,8 +516,8 @@ export default function Billing() {
                             onClick={() => handleBillChange(index)}
                             className={`py-2 px-6 rounded-lg font-semibold transition-all duration-300
                                 ${activeBillIndex === index
-                                    ? 'bg-green-600 text-white shadow-md scale-105'
-                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                    ? `${billThemes[index].activeNav} shadow-md scale-105`
+                                    : `${billThemes[index].inactiveNavBg} ${billThemes[index].inactiveNavText} hover:brightness-95 border border-gray-200`
                                 }`}
                         >
                             Bill {billNumber}
@@ -517,7 +547,9 @@ export default function Billing() {
                                         onChange={handleMedicineNameChange}
                                         onKeyDown={handleKeyDown}
                                         placeholder="Search medicine by name or batch no."
+                                        ref={medicineInputRef}
                                         className="w-full bg-gray-100 p-3 mt-1 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                        autoComplete="off"
                                     />
                                     {(suggestionLoading || suggestions.length > 0) && (
                                         <div className="absolute top-full left-0 right-0 z-10 bg-white rounded-lg shadow-lg border border-gray-200 mt-1 max-h-60 overflow-y-auto">

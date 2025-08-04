@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import BoxLoader from "./looader/BoxLoader";
-
+import myImage from './img4.png';
 
 
 const Login = () => {
@@ -41,7 +41,7 @@ const Login = () => {
       }
 
       // Replace with your actual API URL
-      const response = await axios.post('http://localhost:4000/login', formData);
+      const response = await axios.post('https://pharma-8tny.onrender.com/login', formData);
       
       if (response.status === 200) {
         setMessage(response.data.message || 'Login successful!');
@@ -74,7 +74,7 @@ const Login = () => {
   <div className="relative z-10 flex items-center justify-center w-full h-full">
     {!imageError ? (
       <img
-        src='./img2.png'
+        src = {myImage}
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover"
         onError={() => setImageError(true)}
@@ -103,9 +103,9 @@ const Login = () => {
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 mx-auto mb-4 bg-theme-500 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
-              </svg>
+             <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4m12 0a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">PharmaDesk</h1>
             <p className="text-gray-600">Sign in to your account</p>
@@ -168,7 +168,10 @@ const Login = () => {
             
             {/* Demo Credentials */}
             <div className="text-center text-xs text-gray-400 bg-gray-50 p-2 rounded">
-              Demo: demo@pharmadesk.com / demo123
+              demo:
+              lalitkumar@pharamadesk.com/123456 || 
+              chahit@pharamadesk.com/123456 ||
+              k.k.sagar@pharamadesk.com/123456
             </div>
 
             {/* Response Message */}

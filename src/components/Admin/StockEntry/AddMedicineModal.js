@@ -3,9 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import BoxLoader from "../../looader/BoxLoader";
 
-const BASE_URL = "http://localhost:4000";
+import BASE_URL from "../../../config";
 // Get token from localStorage
-const token = localStorage.getItem('token') || "";
+const token =  localStorage.getItem("lalitkumar_choudhary") || "";
 
 function formatDate(dateStr) {
   if (!dateStr) return "";

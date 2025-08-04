@@ -5,6 +5,7 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import BoxLoader from "../../looader/BoxLoader";
+import BASE_URL from '../../../config';
 
 const StaffDirectory = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const StaffDirectory = () => {
   // New state to manage the loading for the export button
   const [isExporting, setIsExporting] = useState(false); 
 
-  const token = localStorage.getItem('token') || "";
+  const token = localStorage.getItem("lalitkumar_choudhary") || "";
 
   const filterOptions = [
     { value: 'first_name', label: 'Name' },
@@ -39,7 +40,7 @@ const StaffDirectory = () => {
   const fetchEmployeeDetails = async (id) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`http://localhost:4000/admin/employee/${id}`, {
+      const response = await axios.get(`${BASE_URL}/admin/employee/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -67,7 +68,7 @@ const StaffDirectory = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:4000/admin/allEmployee', {
+      const response = await axios.get(`${BASE_URL}/admin/allEmployee`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -87,7 +88,7 @@ const StaffDirectory = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:4000/admin/employeeSearch?${query}=${searchValue}`, {
+        const response = await axios.get(`${BASE_URL}/admin/employeeSearch?${query}=${searchValue}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -106,7 +107,7 @@ const StaffDirectory = () => {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const response = await axios.get('http://localhost:4000/admin/employee/export', {
+      const response = await axios.get(`${BASE_URL}/admin/employee/export`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -231,7 +232,9 @@ const StaffDirectory = () => {
 
       {/* Employee Cards Grid */}
       {loading ? (
-        <div className="text-center text-gray-600">Loading employees...</div>
+        <div className="text-center text-gray-600">
+          <BoxLoader />
+        </div>
       ) : error ? (
         <div className="text-center text-red-600">{error}</div>
       ) : (

@@ -4,8 +4,8 @@ import { Search, ChevronDown, ChevronLeft, ChevronRight, Filter, X, ArrowLeft, F
 import BoxLoader from '../../looader/BoxLoader';
 
 // --- API Configuration ---
-const BASE_URL = 'http://localhost:4000';
-const BEARER_TOKEN = localStorage.getItem("token") || "";
+import BASE_URL from '../../../config'; // adjust path if file is deeper
+const BEARER_TOKEN = localStorage.getItem("lalitkumar_choudhary") || "";
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -263,13 +263,7 @@ const MedicineModal = ({ isOpen, onClose, medicine, onUpdate, onDelete, setLoadi
                     >
                         Delete
                     </button>
-                    <button
-                        onClick={handleUpdate}
-                        className={`rounded-md px-4 py-2 text-sm font-semibold text-white transition-colors 
-                            ${isEditing ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}`}
-                    >
-                        {isEditing ? 'Confirm Update' : 'Update'}
-                    </button>
+
                 </div>
             </div>
         </div>
