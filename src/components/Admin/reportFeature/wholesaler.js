@@ -88,7 +88,7 @@ const WholesalerDetailsModal = ({ wholesaler, onClose, onDelete }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto font-sans">
                 <div className="p-6 border-b sticky top-0 bg-white z-10">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-semibold text-gray-800">Wholesaler Details</h2>
@@ -139,7 +139,7 @@ const WholesalerDetailsModal = ({ wholesaler, onClose, onDelete }) => {
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Invoices from this Wholesaler</h3>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left text-gray-500">
-                                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                <thead className="text-xs text-gray-700 uppercase bg-theme-200">
                                     <tr>
                                         <th scope="col" className="px-6 py-3">Invoice No</th>
                                         <th scope="col" className="px-6 py-3 text-right">Total Amount</th>
@@ -213,7 +213,7 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto font-sans">
                 <div className="p-6 border-b sticky top-0 bg-white z-10">
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-semibold text-gray-800">Add New Wholesaler</h2>
@@ -231,7 +231,7 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
                             value={formData.name}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-theme-500 focus:ring-theme-500 sm:text-xl"
                         />
                     </div>
                     <div>
@@ -242,7 +242,7 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
                             value={formData.gstNo}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-theme-500 focus:ring-theme-500 sm:text-xl"
                         />
                     </div>
                     <div>
@@ -253,7 +253,7 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
                             value={formData.address}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-theme-500 focus:ring-theme-500 sm:text-xl"
                         />
                     </div>
                     <div>
@@ -264,7 +264,7 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
                             value={formData.contactNo}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-theme-500 focus:ring-theme-500 sm:text-xl"
                         />
                     </div>
                     <div>
@@ -275,13 +275,13 @@ const AddWholesalerModal = ({ isOpen, onClose, onAddWholesaler }) => {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-theme-500 focus:ring-theme-500 sm:text-xl"
                         />
                     </div>
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-theme-500 text-white rounded-lg hover:bg-theme-600 transition-colors"
                         >
                             Add Wholesaler
                         </button>
@@ -402,7 +402,7 @@ function Wholesaler() {
     };
 
     return (
-        <div className="bg-gray-50 min-h-screen font-sans">
+        <div className="bg-theme-70 min-h-screen overflow-y-auto font-sans">
             {isLoading && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/30">
                     <BoxLoader />
@@ -420,14 +420,14 @@ function Wholesaler() {
                     <div className="flex flex-col md:flex-row items-center gap-4">
                         <button
                             onClick={handleExport}
-                            className="w-full md:w-auto flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                            className="w-full md:w-auto flex items-center gap-2 px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-600 transition-colors"
                         >
                             <FileSpreadsheet size={20} />
                             Export to Excel
                         </button>
                         <button
                             onClick={handleOpenAddModal}
-                            className="w-full md:w-auto flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                            className="w-full md:w-auto flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition-colors"
                         >
                             <Plus size={20} />
                             Add Wholesaler
@@ -447,7 +447,7 @@ function Wholesaler() {
                                 setSearchTerm(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-theme-500"
                         />
                     </div>
                     <div className="relative">
@@ -457,7 +457,7 @@ function Wholesaler() {
                                 setSortOption(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="w-full md:w-auto appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full md:w-auto appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-theme-500"
                         >
                             <option>Stock Import High to Low</option>
                             <option>Stock Import Low to High</option>
@@ -471,7 +471,7 @@ function Wholesaler() {
                     {/* Desktop Table View */}
                     <div className="hidden md:block">
                         <table className="w-full text-left">
-                            <thead className="bg-cyan-50 border-b border-cyan-200">
+                            <thead className="bg-theme-200 border-b border-theme-200">
                                 <tr>
                                     <th className="p-4 text-sm font-semibold text-gray-600">S.No</th>
                                     <th className="p-4 text-sm font-semibold text-gray-600">Wholesaler Name</th>
@@ -492,7 +492,7 @@ function Wholesaler() {
                                         <td className="p-4">
                                             <button
                                                 onClick={() => handleViewDetails(wholesaler)}
-                                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                                                className="bg-theme-500 text-white px-4 py-2 rounded-lg hover:bg-theme-600 transition-colors"
                                             >
                                                 View
                                             </button>
@@ -505,9 +505,9 @@ function Wholesaler() {
 
                     {/* Mobile Card View */}
                     <div className="md:hidden">
-                        <div className="bg-cyan-50 p-4 text-center font-semibold text-cyan-800">Wholesaler List</div>
+                        <div className="bg-theme-50 p-4 text-center font-semibold text-theme-800">Wholesaler List</div>
                         {paginatedWholesalers.map((wholesaler) => (
-                            <div key={wholesaler.id} className="border-b p-4">
+                            <div key={wholesaler.id} className="border-b last:border-b-0 p-4">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="font-bold text-lg text-gray-800">{wholesaler.name}</p>
@@ -515,7 +515,7 @@ function Wholesaler() {
                                     </div>
                                     <button
                                         onClick={() => handleViewDetails(wholesaler)}
-                                        className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm"
+                                        className="bg-theme-500 text-white px-5 py-2 rounded-lg text-sm hover:bg-theme-700 transition-colors"
                                     >
                                         View
                                     </button>
@@ -543,7 +543,7 @@ function Wholesaler() {
                             <button
                                 onClick={handlePrevPage}
                                 disabled={currentPage === 1}
-                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-theme-100 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <ChevronLeft size={16} />
                                 Prev
@@ -551,7 +551,7 @@ function Wholesaler() {
                             <button
                                 onClick={handleNextPage}
                                 disabled={currentPage === totalPages}
-                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-1 px-3 py-2 border rounded-lg hover:bg-theme-100 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Next
                                 <ChevronRight size={16} />

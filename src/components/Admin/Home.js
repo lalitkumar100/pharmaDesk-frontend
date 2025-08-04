@@ -27,6 +27,7 @@ import Invoice from './reportFeature/invoice';
 // Import the Chatbot App component
 import ChatbotApp from '../ChatbotApp'; // Assuming your chatbot component is in App.js
 import Expiry from './reportFeature/expiry';
+import Sales from './reportFeature/sales';
 
 // Define menu items with their names, icons, and paths
 const menuItems = [
@@ -201,6 +202,7 @@ const Home = () => {
     <Route path="reports/invoice" element={<Invoice />} />
     <Route path="reports/wholesaler" element={<Wholesaler />} />
      <Route path="reports/expiry" element={<Expiry />} />
+       <Route path="reports/sales" element={<Sales />} />
     {/* The Dashboard route is now handled by the index route for /home */}
     {/* If you specifically want /home/dashboard to work, you can add: */}
     {/* <Route path="dashboard" element={<Dashboard />} /> */}

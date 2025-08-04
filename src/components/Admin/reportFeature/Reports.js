@@ -39,7 +39,7 @@ const reportCards = [
     description: "Detailed sales analytics",
     iconColor: "text-blue-600",
     bgHover: "hover:bg-blue-200",
-    route: "/home/reports/sales-analytics",
+    route: "/home/reports/sales",
   }
 ];
 

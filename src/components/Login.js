@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import BoxLoader from "./looader/BoxLoader";
+
+
+
 const Login = () => {
+  const [imageError, setImageError] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -44,7 +48,7 @@ const Login = () => {
         
         // Store token if provided in response
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('lalitkumar_choudhary', response.data.token);
         }
         
         // Navigate to home page after successful login
@@ -62,20 +66,36 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Section - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-theme-500 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-theme-400 to-theme-600"></div>
-        <div className="relative z-10 flex items-center justify-center w-full">
-          <div className="text-center text-white">
-            <div className="w-24 h-24 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center">
-              <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold mb-4">PharmaDesk</h2>
-            <p className="text-lg opacity-90">Professional Pharmacy Management</p>
-          </div>
+ <div className="hidden lg:flex lg:w-1/2 bg-theme-500 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-theme-400 to-theme-600"></div>
+
+
+  {/* Image or Fallback Logo */}
+  <div className="relative z-10 flex items-center justify-center w-full h-full">
+    {!imageError ? (
+      <img
+        src='./img2.png'
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover"
+        onError={() => setImageError(true)}
+      />
+    ) : (
+      <div className="text-center text-white">
+        <div className="w-24 h-24 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center">
+          <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
+              clipRule="evenodd"
+            />
+          </svg>
         </div>
+        <h2 className="text-3xl font-bold mb-4">PharmaDesk</h2>
+        <p className="text-lg opacity-90">Professional Pharmacy Management</p>
       </div>
+    )}
+  </div>
+</div>
 
       {/* Right Section - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-12">
